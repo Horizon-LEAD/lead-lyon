@@ -1,0 +1,4 @@
+*.csv
+*.pbf
+homes.gpkg
+lyon_network.xml.gz
