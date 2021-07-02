@@ -12,6 +12,20 @@ area in Lyon as part of the LEAD project.
 - `nbconvert` for Juypter needs to be installed
 - `pyrosm` needs to be installed (pip or conda)
 
+### Environment
+
+Since 2nd July we have prepared a conda environment file. It is available in `environment.yml`. To install the environment, call:
+
+```sh
+conda env create -n lead_lyon -f environment.yml
+```
+
+It should resolve all the dependencies properly. After, you can enter the environment by:
+
+```sh
+conda activate lead_lyon
+```
+
 ## How to run
 
 - From the synthetic travel demand output for Lyon *(should be 100pct)* some files should be placed or symlinked in `input/`:

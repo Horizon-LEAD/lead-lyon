@@ -35,11 +35,12 @@ public class RunMovements {
 		String networkPath = args[0];
 		String nodesPath = args[1];
 		String activitiesPath = args[2];
+		String outputPath = args[3];
 
 		Config config = ConfigUtils.createConfig();
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("movements_output");
+		config.controler().setOutputDirectory(outputPath);
 		config.controler().setLastIteration(0);
 
 		Scenario scenario = ScenarioUtils.createScenario(config);
@@ -133,7 +134,7 @@ public class RunMovements {
 			reader.close();
 		}
 
-		new PopulationWriter(scenario.getPopulation()).write("movement_population.xml");
+		new PopulationWriter(scenario.getPopulation()).write(outputPath + ".xml");
 
 		for (int i = 0; i < 4; i++) {
 			{
@@ -160,6 +161,7 @@ public class RunMovements {
 				config.planCalcScore().addActivityParams(params);
 			}
 		}
+
 		new Controler(scenario).run();
 	}
 }

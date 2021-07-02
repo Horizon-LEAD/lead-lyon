@@ -32,16 +32,16 @@ fi
 mkdir -p output
 
 ## Generate poly file from GPKG for cutting the OSM data
-jupyter nbconvert "Make Polygon.ipynb" --execute --output-dir output
+jupyter nbconvert "Make Polygon.ipynb" --execute --output-dir output --to html
 
 ## Extract OSM data for the area
 osmosis --read-pbf input/rhone-alpes-latest.osm.pbf --tf accept-ways highway=* --bounding-polygon file=output/confluence_areas.poly --used-node --write-pbf output/confluence.osm.pbf
 
 ## Generate parcels based on synthetic travel demand and ADM survey
-jupyter nbconvert "Generate Parcels.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output
+jupyter nbconvert "Generate Parcels.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
 
 ## Generate the VRP problem to solve
-jupyter nbconvert "Generate VRP.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output
+jupyter nbconvert "Generate VRP.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
 
 ## Build the Java part
 sh -c "cd lead-java && mvn clean package"
