@@ -13,9 +13,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.matsim.core.config.CommandLine;
+import org.matsim.core.config.CommandLine.ConfigurationException;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.listener.IterationEndsListener;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem.FleetSize;
@@ -33,17 +38,22 @@ import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
 public class RunOptimization {
 	static final int SIZE_INDEX = 0;
 
-	static public void main(String[] args) throws NumberFormatException, IOException {
-		String deliveriesPath = args[0];
-		String costsPath = args[1];
-		String depotNode = args[2];
-		String outputPath = args[3];
+	static public void main(String[] args) throws NumberFormatException, IOException, ConfigurationException {
+		CommandLine cmd = new CommandLine.Builder(args) //
+				.requireOptions("deliveries-path", "costs-path", "depot-node", "output-path") //
+				.allowOptions("vehicle-speed", "vehicle-capacity") //
+				.build();
 
-		double vehicleSpeed_m_s = 2.7;
+		String deliveriesPath = cmd.getOptionStrict("deliveries-path");
+		String costsPath = cmd.getOptionStrict("costs-path");
+		String depotNode = cmd.getOptionStrict("depot-node");
+		String outputPath = cmd.getOptionStrict("output-path");
+
+		double vehicleSpeed_m_s = cmd.getOption("vehicle-speed").map(Double::parseDouble).orElse(5.0) / 3.6;
 		double pickupServiceTime_s = 60.0;
 		double deliveryServiceTime_s = 300.0;
-		int vehicleCapacity = 5;
-		int numberOfVehicles = 10;
+		int vehicleCapacity = cmd.getOption("vehicle-capacity").map(Integer::parseInt).orElse(4);
+		int numberOfVehicles = 20;
 
 		// Define costs
 
@@ -154,8 +164,22 @@ public class RunOptimization {
 				.build();
 
 		VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
+
+		AtomicInteger usedIterations = new AtomicInteger(0);
+		algorithm.addListener(new IterationEndsListener() {
+			@Override
+			public void informIterationEnds(int i, VehicleRoutingProblem problem,
+					Collection<VehicleRoutingProblemSolution> solutions) {
+				usedIterations.incrementAndGet();
+			}
+		});
+
+		long startTime = System.nanoTime();
 		Collection<VehicleRoutingProblemSolution> solutions = algorithm.searchSolutions();
+		long endTime = System.nanoTime();
+
 		VehicleRoutingProblemSolution bestSolution = Solutions.bestOf(solutions);
+		double runtime = 1e-9 * (endTime - startTime);
 
 		{
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath)));
@@ -166,7 +190,10 @@ public class RunOptimization {
 					"arrival_time", //
 					"end_time", //
 					"name", //
-					"location_id" //
+					"location_id", //
+					"iterations", //
+					"unassigned_jobs", //
+					"runtime" //
 			}) + "\n");
 
 			for (VehicleRoute route : bestSolution.getRoutes()) {
@@ -181,7 +208,10 @@ public class RunOptimization {
 							String.valueOf(activity.getArrTime()), //
 							String.valueOf(activity.getEndTime()), //
 							String.valueOf(activity.getName()), //
-							String.valueOf(activity.getLocation().getId()) }) + "\n");
+							String.valueOf(activity.getLocation().getId()), //
+							String.valueOf(usedIterations.intValue()), //
+							String.valueOf(bestSolution.getUnassignedJobs().size()), //
+							String.valueOf(runtime) }) + "\n");
 				}
 			}
 

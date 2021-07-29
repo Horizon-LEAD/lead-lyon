@@ -40,6 +40,12 @@ osmosis --read-pbf input/rhone-alpes-latest.osm.pbf --tf accept-ways highway=* -
 ## Generate parcels based on synthetic travel demand and ADM survey
 jupyter nbconvert "Generate Parcels.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
 
+## Generate the VRP network
+jupyter nbconvert "Generate VRP Network.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
+
+## Generate service data
+jupyter nbconvert "Generate Service Data.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
+
 ## Generate the VRP problem to solve
 jupyter nbconvert "Generate VRP.ipynb" --execute --ExecutePreprocessor.timeout=-1 --output-dir output --to html
 
@@ -48,8 +54,8 @@ sh -c "cd lead-java && mvn clean package"
 
 ## Solve the VRP problem using JSprit
 java -cp lead-java/target/lead-0.0.1-SNAPSHOT.jar lead.RunOptimization \
-  output/vrp_deliveries.csv output/vrp_distances.csv 6068627214 output/vrp_solution.csv
+  --deliveries-path output/vrp_deliveries.csv --costs-path output/vrp_distances.csv --depot-node 6068627214 --output-path output/vrp_solution.csv
 
 ## Simulate vehicles in MATSim to create visualisations
 java -cp lead-java/target/lead-0.0.1-SNAPSHOT.jar lead.RunMovements \
-  input/lyon_network.xml.gz output/vrp_nodes.csv output/vrp_solution.csv output/vrp_movements
+  --network-path input/lyon_network.xml.gz --nodes-path output/vrp_nodes.csv --activities-path output/vrp_solution.csv --output-path output/vrp_movements

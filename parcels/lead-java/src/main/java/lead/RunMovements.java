@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -19,6 +21,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.core.config.CommandLine;
+import org.matsim.core.config.CommandLine.ConfigurationException;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -31,11 +35,15 @@ import org.matsim.core.scenario.ScenarioUtils;
 import com.google.common.base.Verify;
 
 public class RunMovements {
-	static public void main(String[] args) throws NumberFormatException, IOException {
-		String networkPath = args[0];
-		String nodesPath = args[1];
-		String activitiesPath = args[2];
-		String outputPath = args[3];
+	static public void main(String[] args) throws NumberFormatException, IOException, ConfigurationException {
+		CommandLine cmd = new CommandLine.Builder(args) //
+				.requireOptions("network-path", "nodes-path", "activities-path", "output-path") //
+				.build();
+
+		String networkPath = cmd.getOptionStrict("network-path");
+		String nodesPath = cmd.getOptionStrict("nodes-path");
+		String activitiesPath = cmd.getOptionStrict("activities-path");
+		String outputPath = cmd.getOptionStrict("output-path");
 
 		Config config = ConfigUtils.createConfig();
 
@@ -136,27 +144,27 @@ public class RunMovements {
 
 		new PopulationWriter(scenario.getPopulation()).write(outputPath + ".xml");
 
-		for (int i = 0; i < 4; i++) {
+		for (String vehicleId : persons.keySet()) {
 			{
-				ActivityParams params = new ActivityParams("start_vehicle_" + i);
+				ActivityParams params = new ActivityParams("start_" + vehicleId);
 				params.setScoringThisActivityAtAll(false);
 				config.planCalcScore().addActivityParams(params);
 			}
 
 			{
-				ActivityParams params = new ActivityParams("end_vehicle_" + i);
+				ActivityParams params = new ActivityParams("end_" + vehicleId);
 				params.setScoringThisActivityAtAll(false);
 				config.planCalcScore().addActivityParams(params);
 			}
 
 			{
-				ActivityParams params = new ActivityParams("pickupShipment_vehicle_" + i);
+				ActivityParams params = new ActivityParams("pickupShipment_" + vehicleId);
 				params.setScoringThisActivityAtAll(false);
 				config.planCalcScore().addActivityParams(params);
 			}
 
 			{
-				ActivityParams params = new ActivityParams("deliverShipment_vehicle_" + i);
+				ActivityParams params = new ActivityParams("deliverShipment_" + vehicleId);
 				params.setScoringThisActivityAtAll(false);
 				config.planCalcScore().addActivityParams(params);
 			}
