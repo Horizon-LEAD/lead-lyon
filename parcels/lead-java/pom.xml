@@ -9,6 +9,7 @@
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<matsim.version>14.0-PR1694</matsim.version>
 	</properties>
 
 	<repositories>
@@ -40,9 +41,19 @@
 			<version>1.6.6</version>
 		</dependency>
 		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>noise</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>emissions</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>12.0</version>
+			<version>${matsim.version}</version>
 		</dependency>
 	</dependencies>
 

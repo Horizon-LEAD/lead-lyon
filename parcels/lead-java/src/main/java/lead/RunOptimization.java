@@ -41,7 +41,7 @@ public class RunOptimization {
 	static public void main(String[] args) throws NumberFormatException, IOException, ConfigurationException {
 		CommandLine cmd = new CommandLine.Builder(args) //
 				.requireOptions("deliveries-path", "costs-path", "depot-node", "output-path") //
-				.allowOptions("vehicle-speed", "vehicle-capacity") //
+				.allowOptions("vehicle-speed", "vehicle-capacity", "vehicle-type", "max-iterations") //
 				.build();
 
 		String deliveriesPath = cmd.getOptionStrict("deliveries-path");
@@ -53,6 +53,7 @@ public class RunOptimization {
 		double pickupServiceTime_s = 60.0;
 		double deliveryServiceTime_s = 300.0;
 		int vehicleCapacity = cmd.getOption("vehicle-capacity").map(Integer::parseInt).orElse(4);
+		int maximumIterations = cmd.getOption("max-iterations").map(Integer::parseInt).orElse(2000);
 		int numberOfVehicles = 20;
 
 		// Define costs
@@ -78,8 +79,14 @@ public class RunOptimization {
 					String toId = row.get(header.indexOf("to_node"));
 					double distance = Double.parseDouble(row.get(header.indexOf("distance")));
 
+					double travelTime = distance / vehicleSpeed_m_s;
+
+					if (header.indexOf("travel_time") >= 0) {
+						travelTime = Double.parseDouble(row.get(header.indexOf("travel_time")));
+					}
+
 					costBuilder.addTransportDistance(fromId, toId, distance);
-					costBuilder.addTransportTime(fromId, toId, distance / vehicleSpeed_m_s);
+					costBuilder.addTransportTime(fromId, toId, travelTime);
 				}
 			}
 
@@ -136,13 +143,29 @@ public class RunOptimization {
 
 		// Vehicles
 
-		VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance("robo") //
-				.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
-				.setCostPerWaitingTime(0.0) //
-				.setCostPerDistance(1.0) //
-				.setCostPerTransportTime(0.0) //
-				.setCostPerServiceTime(0.0) //
-				.setFixedCost(0.0);
+		VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance("robo");
+
+		switch (cmd.getOption("vehicle-type").orElse("robo")) {
+		case "robo":
+			vehicleTypeBuilder //
+					.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+					.setCostPerWaitingTime(0.0) //
+					.setCostPerDistance(1.0) //
+					.setCostPerTransportTime(0.0) //
+					.setCostPerServiceTime(0.0) //
+					.setFixedCost(0.0);
+			break;
+		case "van":
+			vehicleTypeBuilder //
+					.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+					.setCostPerWaitingTime(0.0) //
+					.setCostPerDistance(0.4 * 1e-3) //
+					.setCostPerTransportTime(0.0) //
+					.setCostPerServiceTime(0.0) //
+					.setFixedCost(4000.0 * 12.0 / 365.0);
+			break;
+		}
+
 		VehicleTypeImpl vehicleType = vehicleTypeBuilder.build();
 
 		List<VehicleImpl> vehicles = new LinkedList<>();
@@ -164,6 +187,7 @@ public class RunOptimization {
 				.build();
 
 		VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
+		algorithm.setMaxIterations(maximumIterations);
 
 		AtomicInteger usedIterations = new AtomicInteger(0);
 		algorithm.addListener(new IterationEndsListener() {
@@ -193,15 +217,26 @@ public class RunOptimization {
 					"location_id", //
 					"iterations", //
 					"unassigned_jobs", //
-					"runtime" //
+					"runtime", //
+					"distance", //
 			}) + "\n");
 
 			for (VehicleRoute route : bestSolution.getRoutes()) {
 				List<TourActivity> activities = new LinkedList<>(route.getActivities());
-				activities.set(0, route.getStart());
+				activities.add(0, route.getStart());
 				activities.add(route.getEnd());
 
+				double distance = 0.0;
+				TourActivity previousActivity = null;
+
 				for (TourActivity activity : activities) {
+					if (previousActivity != null) {
+						distance += costs.getDistance(previousActivity.getLocation(), activity.getLocation(),
+								previousActivity.getEndTime(), route.getVehicle());
+					}
+
+					previousActivity = activity;
+
 					writer.write(String.join(";", new String[] { //
 							route.getVehicle().getId(), //
 							String.valueOf(activity.getIndex()), //
@@ -211,7 +246,9 @@ public class RunOptimization {
 							String.valueOf(activity.getLocation().getId()), //
 							String.valueOf(usedIterations.intValue()), //
 							String.valueOf(bestSolution.getUnassignedJobs().size()), //
-							String.valueOf(runtime) }) + "\n");
+							String.valueOf(runtime), //
+							String.valueOf(distance) //
+					}) + "\n");
 				}
 			}
 
