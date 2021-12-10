@@ -9,9 +9,11 @@ rm -rf 03_vrp/environment
 rm -rf 03_vrp/code
 
 # Copy the raw data sets to the population synthesis environment
-cp raw_data/population/* 01_synthetic_population/data
-cp raw_data/scenario/area.gpkg 03_vrp/input
-cp raw_data/scenario/rhones-alpes.osm.pbf 03_vrp/input/region.osm.pbf
+cp raw_data/* 01_synthetic_population/data
+cp raw_data/osm/rhones-alpes.osm.pbf 03_vrp/input/region.osm.pbf
+
+# Copy perimeter file for the study area
+cp raw_data/study_area.gpkg 03_vrp/input/area.gpkg
 
 # 1) Population synthesis
 cp raw_data/* 01_synthetic_population/data # Move the raw input data
