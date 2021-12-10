@@ -17,6 +17,6 @@ papermill \
   -p scaling ${scaling} \
   -p earliest_delivery_time ${earliest_delivery_time} \
   -p latest_delivery_time ${latest_delivery_time} \
-  "Generate Parcels.ipynb" "output/Temporary.ipynb"
+  "Generate Parcels.ipynb" "Temporary.ipynb"
 
-rm output/Temporary.ipynb
+rm Temporary.ipynb

@@ -18,8 +18,8 @@ JAVA_HOME=$(realpath environment/java)
 # Create a polygon file from a shapefile / GeoPackage
 #papermill \
 #  -p output_path temp \
-#  "Make Polygon.ipynb" "output/Temporary.ipynb"
-#rm output/Temporary.ipynb
+#  "Make Polygon.ipynb" "temp/Temporary.ipynb"
+#rm temp/Temporary.ipynb
 
 # Extract OSM data for the area
 #osmosis --read-pbf input/region.osm.pbf \
@@ -30,8 +30,8 @@ JAVA_HOME=$(realpath environment/java)
 #papermill \
 #  -p input_path temp \
 #  -p output_path temp \
-#  "Generate VRP Network.ipynb" "output/Temporary.ipynb"
-#rm output/Temporary.ipynb
+#  "Generate VRP Network.ipynb" "temp/Temporary.ipynb"
+#rm temp/Temporary.ipynb
 
 # Generate the VRP problem to solve
 #ln -s ../input/slots.csv temp/slots.csv
@@ -41,7 +41,8 @@ JAVA_HOME=$(realpath environment/java)
 #papermill \
 #  -p input_path temp \
 #  -p output_path temp \
-#  "Generate VRP Instance.ipynb" "output/Temporary.ipynb"
+#  "Generate VRP Instance.ipynb" "temp/Temporary.ipynb"
+#rm temp/Temporary.ipynb
 
 # Solve the VRP problem using JSprit
 java -cp lead-0.0.1-SNAPSHOT.jar lead.RunOptimization \

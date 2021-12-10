@@ -1,3 +1,8 @@
+## Attention: Instance needs build tools, e.g. for Ubuntu:
+# sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential
+
+set -e
+
 # Reset the environments
 rm -rf 01_synthetic_population/environment
 rm -rf 01_synthetic_population/pipeline
@@ -17,16 +22,22 @@ cp raw_data/study_area.gpkg 03_vrp/input/area.gpkg
 
 # 1) Population synthesis
 cp raw_data/* 01_synthetic_population/data # Move the raw input data
-bash 01_synthetic_population/00_setup.sh
-bash 01_synthetic_population/01_run.sh
+cd 01_synthetic_population
+bash 00_setup.sh
+bash 01_run.sh
+cd ..
 
 # 2) Parcel generation
 cp 01_synthetic_population/output/* 02_parcel_generation/input # Copy popualtion input data
-bash 02_parcel_generation/00_setup.sh
-bash 02_parcel_generation/01_run.sh
+cd 02_parcel_generation
+bash 00_setup.sh
+bash 01_run.sh
+cd ..
 
 # 3) Solve VRP
 cp 02_parcel_generation/output/* 03_vrp/input # Copy demand input data
 cp 01_synthetic_population/output/homes.gpkg 03_vrp/input # Copy some population input
-bash 03_vrp/00_setup.sh
-bash 03_vrp/01_run.sh
+cd 03_vrp
+bash 00_setup.sh
+bash 01_run.sh
+cd ..
