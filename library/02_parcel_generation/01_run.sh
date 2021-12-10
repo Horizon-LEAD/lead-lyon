@@ -1,6 +1,9 @@
 set -e
 mkdir -p output
 
+rm -rf temp
+mkdir -p temp
+
 # Enter the environment
 source environment/miniconda/etc/profile.d/conda.sh
 conda activate lead_lyon
@@ -17,6 +20,6 @@ papermill \
   -p scaling ${scaling} \
   -p earliest_delivery_time ${earliest_delivery_time} \
   -p latest_delivery_time ${latest_delivery_time} \
-  "Generate Parcels.ipynb" "Temporary.ipynb"
+  "Generate Parcels.ipynb" "temp/Temporary.ipynb"
 
-rm Temporary.ipynb
+rm -rf temp

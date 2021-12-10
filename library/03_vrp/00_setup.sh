@@ -15,12 +15,6 @@ conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda env create -f code/parcels/environment.yml
 
-# Set up osmosis
-wget https://github.com/openstreetmap/osmosis/releases/download/0.48.2/osmosis-0.48.2.tgz -O environment/osmosis.tgz
-mkdir -p environment/osmosis
-tar xf environment/osmosis.tgz -C environment/osmosis
-PATH=$(realpath environment/osmosis/bin):$PATH
-
 # Set up Java
 wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.13_8.tar.gz -O environment/java.tar.gz
 tar xf environment/java.tar.gz -C environment
@@ -33,6 +27,12 @@ wget http://mirror.easyname.ch/apache/maven/maven-3/3.6.3/binaries/apache-maven-
 tar xf environment/maven.tar.gz -C environment
 mv environment/apache-maven-3.6.3 environment/maven
 PATH=$(realpath environment/maven/bin):$PATH
+
+# Set up osmosis
+wget https://github.com/openstreetmap/osmosis/releases/download/0.48.2/osmosis-0.48.2.tgz -O environment/osmosis.tgz
+mkdir -p environment/osmosis
+tar xf environment/osmosis.tgz -C environment/osmosis
+PATH=$(realpath environment/osmosis/bin):$PATH
 
 # Test environment
 conda activate lead_lyon

@@ -14,6 +14,13 @@ conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda env create -f pipeline/environment.yml
 
+# Set up Java
+wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.13_8.tar.gz -O environment/java.tar.gz
+tar xf environment/java.tar.gz -C environment
+mv environment/jdk-11.0.13+8 environment/java
+PATH=$(realpath environment/java/bin):$PATH
+JAVA_HOME=$(realpath environment/java)
+
 # Set up osmosis
 wget https://github.com/openstreetmap/osmosis/releases/download/0.48.2/osmosis-0.48.2.tgz -O environment/osmosis.tgz
 mkdir -p environment/osmosis

@@ -27,7 +27,6 @@ sed -i -E "s/random_seed: .+/&\n\departments: [\"01\", 38, 42, 69, 69M]/" pipeli
 # Enter the environment
 source environment/miniconda/etc/profile.d/conda.sh
 conda activate ile-de-france
-PATH=$(realpath environment/osmosis/bin):$PATH
 
 # Run the pipeline
 cd pipeline
