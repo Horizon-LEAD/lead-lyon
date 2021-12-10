@@ -13,7 +13,6 @@ cp pipeline/config.yml pipeline/lead_config.yml
 sed -i -E "s/data_path: .+/data_path: ..\/data/" pipeline/lead_config.yml
 sed -i -E "s/output_path: .+/output_path: ..\/ouput/" pipeline/lead_config.yml
 sed -i -E "s/working_directory: .+/working_directory: ..\/cache/" pipeline/lead_config.yml
-sed -i -E "s/osmosis_path: .+/osmosis_path: ..\/environment\/osmosis\/bin\/osmosis/" pipeline/lead_config.yml
 
 sed -i -E "s/random_seed: .+/random_seed: ${random_seed}/g" pipeline/lead_config.yml
 sed -i -E "s/sampling_rate: .+/sampling_rate: ${sampling_rate}/" pipeline/lead_config.yml
@@ -27,6 +26,8 @@ sed -i -E "s/random_seed: .+/&\n\departments: [\"01\", 38, 42, 69, 69M]/" pipeli
 # Enter the environment
 source environment/miniconda/etc/profile.d/conda.sh
 conda activate ile-de-france
+PATH=$(realpath environment/java/bin):$(realpath environment/osmosis/bin):$PATH
+JAVA_HOME=$(realpath environment/java)
 
 # Run the pipeline
 cd pipeline
