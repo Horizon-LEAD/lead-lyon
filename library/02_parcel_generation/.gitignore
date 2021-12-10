@@ -1,0 +1,12 @@
+/.ipynb_checkpoints
+/code
+/environment
+/slots.pdf
+
+/input/**
+!/input/.gitkeep
+
+/output/**
+!/output/.gitkeep
+
+/*.ipynb

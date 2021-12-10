@@ -1,0 +1,11 @@
+/pipeline
+/environment
+/cache
+
+/data/**
+!/data/.gitkeep
+
+/output/**
+!/output/.gitkeep
+
+/*.ipynb

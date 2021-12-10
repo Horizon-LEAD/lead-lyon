@@ -1,0 +1,13 @@
+/.ipynb_checkpoints
+/code
+/environment
+/temp
+
+/input/**
+!/input/.gitkeep
+
+/output/**
+!/output/.gitkeep
+
+/*.ipynb
+/*.jar
