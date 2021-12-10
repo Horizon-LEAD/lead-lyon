@@ -28,7 +28,7 @@ bash 01_run.sh
 cd ..
 
 # 2) Parcel generation
-cp 01_synthetic_population/output/* 02_parcel_generation/input # Copy popualtion input data
+cp -r 01_synthetic_population/output/* 02_parcel_generation/input # Copy popualtion input data
 cd 02_parcel_generation
 bash 00_setup.sh
 bash 01_run.sh
