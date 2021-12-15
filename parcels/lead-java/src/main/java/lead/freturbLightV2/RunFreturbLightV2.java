@@ -1,5 +1,6 @@
 package lead.freturbLightV2;
 
+import org.checkerframework.checker.units.qual.C;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -14,13 +15,14 @@ public class RunFreturbLightV2 {
 
     public static void main(String[] args) throws Exception {
 
-//        String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
-        String sireneFile = "D:/Praktikum/StockEtablissement_utf8.csv";
-//        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv";
-        String filterFile = "D:/Praktikum/lyons_coords.csv";
-//        String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
-        String sirenFile = "D:/Praktikum/StockUniteLegale_utf8.csv";
+        String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
+//        String sireneFile = "D:/Praktikum/StockEtablissement_utf8.csv";
+        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv";
+//        String filterFile = "D:/Praktikum/lyons_coords.csv";
+        String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
+//        String sirenFile = "D:/Praktikum/StockUniteLegale_utf8.csv";
         final Coord CENTER = new Coord(842443.74, 6519278.68);
+        final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
 
@@ -31,7 +33,7 @@ public class RunFreturbLightV2 {
 //        CreateMovementV2.calculateMovements(firms);
         CreateMovementV2.calculateMovementsWithCorrection(firms);
 
-        DistributionV2.distributeLogistics(firms, CENTER);
+        DistributionV2.distributeLogistics(firms, CENTERS);
 
         double co = 0;
         for (Move firmDataV2 : Move.movementsList) {
@@ -107,48 +109,48 @@ public class RunFreturbLightV2 {
         System.out.println("calculated:" + cal);
 
 
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements.txt"))) {
-            writer.write("startX;startY;endX;endY;score;linestring");
-            writer.newLine();
-            for (CalculateRoutes.Trip trip : trips){
-                writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements10pct.txt"))) {
-            writer.write("startX;startY;endX;endY;score;linestring");
-            writer.newLine();
-            Random r = new Random(123);
-            for (CalculateRoutes.Trip trip : trips){
-                if (r.nextDouble() < 0.1) {
-                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-                    writer.newLine();
-                    writer.flush();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements1pct.txt"))) {
-            writer.write("startX;startY;endX;endY;score;linestring;length");
-            writer.newLine();
-            Random r = new Random(123);
-            for (CalculateRoutes.Trip trip : trips){
-                if (r.nextDouble() < 0.01) {
-                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-                    writer.newLine();
-                    writer.flush();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements.txt"))) {
+//            writer.write("startX;startY;endX;endY;score;linestring");
+//            writer.newLine();
+//            for (CalculateRoutes.Trip trip : trips){
+//                writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
+//                writer.newLine();
+//                writer.flush();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements10pct.txt"))) {
+//            writer.write("startX;startY;endX;endY;score;linestring");
+//            writer.newLine();
+//            Random r = new Random(123);
+//            for (CalculateRoutes.Trip trip : trips){
+//                if (r.nextDouble() < 0.1) {
+//                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
+//                    writer.newLine();
+//                    writer.flush();
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements1pct.txt"))) {
+//            writer.write("startX;startY;endX;endY;score;linestring;length");
+//            writer.newLine();
+//            Random r = new Random(123);
+//            for (CalculateRoutes.Trip trip : trips){
+//                if (r.nextDouble() < 0.01) {
+//                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
+//                    writer.newLine();
+//                    writer.flush();
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 
 

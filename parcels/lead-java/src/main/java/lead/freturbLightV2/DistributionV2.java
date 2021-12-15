@@ -34,16 +34,30 @@ public class DistributionV2 {
         this.disVeh = disVeh;
     }
 
-    public static List<FirmDataV2> distributeLogistics(List<FirmDataV2> firms, Coord center) {
+    public static List<FirmDataV2> distributeLogistics(List<FirmDataV2> firms, List<Coord> centers) {
         Random random = new Random(21656368);
         for (FirmDataV2 firm : firms) {
-            firm.centerDistance = CoordUtils.calcEuclideanDistance(center, firm.coord)/1000;
+            double centerDistance = Double.MAX_VALUE;
+            int centerId = 0;
+            int count = 1;
+            for (Coord centerCoord : centers) {
+                double tmpDistance = CoordUtils.calcEuclideanDistance(firm.coord, centerCoord)/1000;
+                if (tmpDistance < centerDistance) {
+                    centerDistance = tmpDistance;
+                    centerId = count;
+                }
+                count++;
+            }
+//            final Coord CENTER = new Coord(842443.74, 6519278.68);
+//            firm.centerDistance = CoordUtils.calcEuclideanDistance(firm.coord, CENTER)/1000;
+            firm.centerDistance = centerDistance;
             Move[] moves = new Move[firm.movements];
             for (int i = 0; i < firm.movements; i++) {
                 Move move = distributeLogistics(firm, random);
                 move.setLogistic();
                 moves[i] = move;
                 move.st8 = firm.st8;
+                move.centerId = centerId;
                 Move.movementsList.add(move);
             }
             firm.moves = moves;

@@ -14,6 +14,7 @@ import static lead.freturbLightV2.DistributionV2.DistributionVehicleST20.Vehicle
 public class Move implements Comparable {
     public static List<Move> movementsList = new ArrayList<>();
     private static int idCount = 0;
+    public int centerId;
     int id;
     int st8;
     Movement disMove;

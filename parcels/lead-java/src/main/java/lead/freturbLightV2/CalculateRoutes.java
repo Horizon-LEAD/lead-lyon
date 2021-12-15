@@ -6,62 +6,6 @@ import java.util.*;
 
 public class CalculateRoutes {
 
-
-    public static List<Trip> calculateDirectRouts(List<Move> movementsList) {
-        Random rnd = new Random(3146464);
-
-        List<Trip> tripsList = new ArrayList<>();
-        List<Move> startPointList = new ArrayList<>();
-        List<Move> endPointList = new ArrayList<>();
-
-        for (Move move : movementsList) {
-            if (move.disMove.equals(DistributionV2.DistributionMovement.Movement.enlèvements)) {
-                startPointList.add(move);
-            } else if (move.disMove.equals(DistributionV2.DistributionMovement.Movement.livraisons)) {
-                endPointList.add(move);
-            } else {
-                startPointList.add(move);
-                endPointList.add(move);
-            }
-        }
-
-        movementsList = null;
-
-        Collections.shuffle(startPointList, rnd);
-        Collections.sort(endPointList);
-
-        List<Double> checkDouble = new ArrayList<>();
-
-        double diffDistance = Double.MAX_VALUE;
-        Iterator<Move> iteratorStart = startPointList.iterator();
-        while (iteratorStart.hasNext()) {
-            int index = 0;
-            Move startMove = iteratorStart.next();
-            Move endMove = null;
-            if (checkDouble.contains(startMove.travelDistance)) {
-                continue;
-            }
-            for (Move move : endPointList) {
-                if ((move.disMove.equals(DistributionV2.DistributionMovement.Movement.conjointes) || move.disMove.equals(DistributionV2.DistributionMovement.Movement.livraisons))
-                        && startMove.disVeh20.equals(move.disVeh20) && startMove.disMan.equals(move.disMan)
-                        && startMove.travelDistance != move.travelDistance) {
-                    if (Math.abs(move.travelDistance - startMove.travelDistance) <= diffDistance) {
-                        diffDistance = Math.abs(move.travelDistance - startMove.travelDistance);
-                    } else if (Math.abs(move.travelDistance - startMove.travelDistance) >= diffDistance) {
-                        endMove = endPointList.get(index);
-                        checkDouble.add(endMove.travelDistance);
-                        continue;
-                    }
-                }
-                index++;
-            }
-            tripsList.add(new Trip(startMove, endMove, 2));
-            iteratorStart.remove();
-            endPointList.remove(endMove);
-        }
-        return tripsList;
-    }
-
     public static List<Trip> calculateDirectRoutsV2(List<Move> movementsList) {
         int movementsSize = movementsList.size();
         System.out.println(movementsSize + " direct Movements getting paired");
@@ -108,7 +52,7 @@ public class CalculateRoutes {
     }
 
     private static double scoreConnection(Move firstMove, Move possibleMove) {
-        if (!firstMove.logisticMatch.contains(possibleMove.logisticType) && firstMove.id != possibleMove.id) {
+        if (!firstMove.logisticMatch.contains(possibleMove.logisticType) || firstMove.id == possibleMove.id) {
             return Double.MAX_VALUE;
         }
         double distance = (CoordUtils.calcEuclideanDistance(firstMove.ownCoord, possibleMove.ownCoord)/1000) * 1.4;
@@ -117,12 +61,40 @@ public class CalculateRoutes {
         return Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
     }
 
+    public static List<Trip> calculateBestDirectRoutsV2(List<Move> movementsList) {
+        int movementsSize = movementsList.size();
+        System.out.println(movementsSize + " best direct Movements getting paired");
+        List<Trip> tripsList = new ArrayList<>();
+        for (Move startMove : movementsList) {
+            double minScore = Double.MAX_VALUE;
+            Move bestFit = null;
+            for (Move possibleMove : movementsList) {
+                double score = scoreConnection(startMove, possibleMove);
+                if (minScore > score) {
+                    minScore = score;
+                    bestFit = possibleMove;
+                }
+            }
+            Trip trip = new Trip(startMove, bestFit);
+            trip.bestScore = minScore;
+            tripsList.add(trip);
+        }
+        return tripsList;
+    }
+
     static class Trip implements Comparable{
         Move startPiont;
         Move entpoint;
         double score;
+        double bestScore;
 
         public Trip(Move startPiont, Move entpoint, double score) {
+            this.startPiont = startPiont;
+            this.entpoint = entpoint;
+            this.score = score;
+        }
+
+        public Trip(Move startPiont, Move entpoint) {
             this.startPiont = startPiont;
             this.entpoint = entpoint;
             this.score = score;

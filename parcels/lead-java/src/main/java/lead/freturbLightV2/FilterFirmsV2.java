@@ -153,8 +153,8 @@ public class FilterFirmsV2 {
     private static Map<Long, Coord> readInLyonFile() {
         Map<Long, Coord> inLyon = new HashMap();
 
-//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv")))){
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/Praktikum/lyons_coords.csv")))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/Praktikum/lyons_coords.csv")))){
 
             String line;
             List<String> header = null;
