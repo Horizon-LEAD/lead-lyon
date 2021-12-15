@@ -22,6 +22,7 @@ public class RunFreturbLightV2 {
         String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
 //        String sirenFile = "D:/Praktikum/StockUniteLegale_utf8.csv";
         final Coord CENTER = new Coord(842443.74, 6519278.68);
+        boolean oneCenter = false;
         final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
@@ -33,7 +34,7 @@ public class RunFreturbLightV2 {
 //        CreateMovementV2.calculateMovements(firms);
         CreateMovementV2.calculateMovementsWithCorrection(firms);
 
-        DistributionV2.distributeLogistics(firms, CENTERS);
+        DistributionV2.distributeLogistics(firms, CENTERS, oneCenter);
 
         double co = 0;
         for (Move firmDataV2 : Move.movementsList) {
