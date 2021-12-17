@@ -27,7 +27,7 @@ public class DistributionV2 {
     static DistributionV2[] distributions = generateDistributionV2();
     static DistributionVehicleST20[] distributionVehicles = vehicleDistributionST20();
 
-    DistributionV2(int st8, DistributionMovement disMove, DistributionManagement disMan, DistributionVehicle disVeh) {
+    DistributionV2(int st8, DistributionMovement disMove,   DistributionManagement disMan, DistributionVehicle disVeh) {
         this.st8 = st8;
         this.disMove = disMove;
         this.disMan = disMan;
@@ -128,10 +128,19 @@ public class DistributionV2 {
             move.routeType = Move.RouteType.round;
         }
 
+//        move.travelDistance = variable[0] * TYPE_OF_MOVEMENT + variable[1] * MANAGEMENT_MODE + ACTIVITY_TYPE_ARRAY[firm.st8 - 1] * ACTIVITY_TYPE + variable[2] * VEHICLE_TYPE + firm.centerDistance * DISTANCE;
 
-        move.travelDistance = variable[0] * TYPE_OF_MOVEMENT + variable[1] * MANAGEMENT_MODE + ACTIVITY_TYPE_ARRAY[firm.st8 - 1] * ACTIVITY_TYPE + variable[2] * VEHICLE_TYPE + firm.centerDistance * DISTANCE;
+        double tmpTravelDistance = variable[0] * TYPE_OF_MOVEMENT + variable[1] * MANAGEMENT_MODE + ACTIVITY_TYPE_ARRAY[firm.st8 - 1] * ACTIVITY_TYPE + variable[2] * VEHICLE_TYPE + firm.centerDistance * DISTANCE;
+
+        move.travelDistance  = getSample(tmpTravelDistance, random);
 
         return move;
+    }
+
+    private static double getSample(double tmpTravelDistance, Random random) {
+        double sample = random.nextDouble();
+        double distance = tmpTravelDistance * -Math.log(sample);
+        return distance;
     }
 
     private static int getTypeOfMovement(Random random) {

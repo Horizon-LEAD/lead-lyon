@@ -38,7 +38,7 @@ public class CalculateRoutes {
         Trip trip = null;
         for (Move move : movementsList) {
             double score = scoreConnection(firstMove, move);
-            if (minScore > score) {
+            if (score < minScore) {
                 minScore = score;
                 bestFit = move;
             }
@@ -52,7 +52,10 @@ public class CalculateRoutes {
     }
 
     private static double scoreConnection(Move firstMove, Move possibleMove) {
-        if (!firstMove.logisticMatch.contains(possibleMove.logisticType) || firstMove.id == possibleMove.id) {
+        if (firstMove.id == possibleMove.id || firstMove.ownCoord.equals(possibleMove.ownCoord)) {
+            return Double.MAX_VALUE;
+        }
+        if (!firstMove.logisticDirectMatch.contains(possibleMove.logisticDirectType) && !possibleMove.logisticDirectMatch.contains(firstMove.logisticDirectType)) {
             return Double.MAX_VALUE;
         }
         double distance = (CoordUtils.calcEuclideanDistance(firstMove.ownCoord, possibleMove.ownCoord)/1000) * 1.4;
@@ -109,6 +112,166 @@ public class CalculateRoutes {
         public String toString() {
             return "Score: " + score;
         }
+    }
+
+    static List<Trip> findBetterSolutions(List<Move> movementsList){
+       List<Move> startMoves = new ArrayList<>();
+       List<Move> endMoves = new ArrayList<>();
+
+       for (Move move : movementsList) {
+           if (move.disMove.equals(DistributionV2.DistributionMovement.Movement.livraisons)) {
+               endMoves.add(move);
+           } else {
+               startMoves.add(move);
+           }
+       }
+
+       Collections.shuffle(startMoves);
+       Solution initialSolution = new Solution(endMoves);
+       List<Trip> notOptimalTrips = new ArrayList<>();
+
+       for (Move startMove : startMoves) {
+           TreeSet<Trip> endPoints = findAllSolution(startMove, endMoves);
+           Iterator<Trip> iterator = endPoints.iterator();
+           Trip tmpTrip = iterator.next();
+           boolean found = true;
+           while (initialSolution.usedIds.contains(tmpTrip.entpoint.id) && found) {
+               notOptimalTrips.add(tmpTrip);
+               if (!iterator.hasNext()) {
+                   found = false;
+                   continue;
+               }
+               tmpTrip = iterator.next();
+           }
+           if (found) {
+               initialSolution.addEndPoint(tmpTrip);
+           } else {
+               initialSolution.addPairLess(startMove);
+           }
+       }
+
+//       for (Trip notOptimalTrip : notOptimalTrips) {
+//           TreeSet<Trip> notOptimalTripEndPoints = findAllSolution(notOptimalTrip.startPiont, endMoves);
+//           Trip optimalTrip = notOptimalTripEndPoints.first();
+//           int idOT = optimalTrip.entpoint.id;
+//           Move thief = initialSolution.solution.get(idOT);
+//           if (thief == null) {
+//               continue;
+//           }
+//           TreeSet<Trip> thiefEndPoints = findAllSolution(thief, endMoves);
+//           Iterator<Trip> iterator = thiefEndPoints.iterator();
+//           Trip tmpTrip = iterator.next();
+//           boolean found = true;
+//           while (initialSolution.usedIds.contains(tmpTrip.entpoint.id) && found) {
+//               if (!iterator.hasNext()) {
+//                   found = false;
+//                   continue;
+//               }
+//               tmpTrip = iterator.next();
+//           }
+//           if (found && initialSolution.compareScore(optimalTrip, tmpTrip, thief, idOT, notOptimalTrip)) {
+//               initialSolution.removeUsedId(notOptimalTrip.entpoint.id);
+//               initialSolution.removeUsedId(thief.id);
+//               initialSolution.addEndPoint(optimalTrip);
+//               initialSolution.addEndPoint(tmpTrip);
+//               System.out.println("Better");
+//           }
+//       }
+//
+//        System.out.println("Done");
+        return initialSolution.getTrips();
+
+    }
+
+    static class Solution {
+        double score = 0;
+        List<Move> endMoves;
+        List<Integer> usedIds = new ArrayList<>();
+        Map<Integer, Move> solution = new HashMap<>();
+        List<Move> pairLess = new ArrayList<>();
+
+        public Solution(List<Move> endMoves) {
+            this.endMoves = endMoves;
+        }
+
+        void addPairLess(Move move) {
+            pairLess.add(move);
+        }
+
+        void addEndPoint(Trip trip) {
+            solution.put(trip.entpoint.id,trip.startPiont);
+            usedIds.add(trip.entpoint.id);
+            increaseScore(trip.score);
+        }
+
+        void increaseScore(double score) {
+            this.score += score;
+        }
+
+        void decreaseScore(double score) {
+            this.score -= score;
+        }
+
+        void removeUsedId(int id) {
+            Move move = solution.get(Integer.valueOf(id));
+            Move finalEndMove = null;
+            for (Move endMove : endMoves) {
+                if (endMove.id == id) {
+                    finalEndMove = endMove;
+                }
+            }
+            decreaseScore(scoreConnection(move,finalEndMove));
+            this.usedIds.remove(Integer.valueOf(id));
+            this.solution.remove(Integer.valueOf(id));
+        }
+
+        public List<Trip> getTrips() {
+            List<Trip> trips =  new ArrayList<>();
+            for (Map.Entry<Integer, Move> entry : solution.entrySet()) {
+                Move finalEndMove = null;
+                for (Move endMove : endMoves) {
+                    if (endMove.id == entry.getKey()) {
+                        finalEndMove = endMove;
+                    }
+                }
+                trips.add(new Trip(entry.getValue(), finalEndMove, scoreConnection(entry.getValue(), finalEndMove)));
+            }
+            return  trips;
+        }
+
+        public boolean compareScore(Trip optimalTrip, Trip tmpTrip, Move thief, int id, Trip notOptimalTrip) {
+            double scoreOptimal = optimalTrip.score;
+            double scoreTmp = tmpTrip.score;
+            Move finalEndMove = null;
+            for (Move endMove : endMoves) {
+                if (endMove.id == id) {
+                    finalEndMove = endMove;
+                }
+            }
+            double oldScore = scoreConnection(thief, finalEndMove);
+            double scoreNotOptimal = notOptimalTrip.score;
+            return oldScore + scoreNotOptimal > scoreOptimal + scoreTmp;
+        }
+    }
+
+
+    private static Move findMoveWhoTookBestMatch(int id, List<Trip> optimalSolution) {
+        for (Trip trip : optimalSolution) {
+            if (trip.entpoint.id == id) {
+                return trip.startPiont;
+            }
+        }
+        return null;
+    }
+
+    private static TreeSet<Trip> findAllSolution(Move move, List<Move> endPoints) {
+        TreeSet<Trip> set = new TreeSet<>();
+        for (Move possibleEndMove : endPoints) {
+            double localScore = scoreConnection(move, possibleEndMove);
+            Trip trip = new Trip(move, possibleEndMove, localScore);
+            set.add(trip);
+        }
+        return set;
     }
 
 }

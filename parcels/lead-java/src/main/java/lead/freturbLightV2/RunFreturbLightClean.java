@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class RunFreturbLightClean {
 
@@ -28,37 +29,80 @@ public class RunFreturbLightClean {
         CreateMovementV2.calculateMovementsWithCorrection(firms);
         DistributionV2.distributeLogistics(firms, CENTERS, oneCenter);
 
-        System.out.println("Get direct Movements");
-        List<Move> directMoveList = new ArrayList<>();
+        System.out.println("Get round Movements");
+        List<Move> roundMoveList = new ArrayList<>();
         for (Move move : Move.movementsList) {
-            if (move.routeType.equals(Move.RouteType.direct)) {
-                directMoveList.add(move);
+            if (move.routeType.equals(Move.RouteType.round)) {
+                roundMoveList.add(move);
             }
         }
-        List<Move> movementsList = directMoveList;
-        firms.clear();
-        List<CalculateRoutes.Trip> bestTrips = CalculateRoutes.calculateBestDirectRoutsV2(movementsList);
-        List<CalculateRoutes.Trip> trips = CalculateRoutes.calculateDirectRoutsV2(movementsList);
 
-        for (CalculateRoutes.Trip trip : trips) {
-            for (CalculateRoutes.Trip bestTrip : bestTrips) {
-                if (bestTrip.startPiont.id == trip.startPiont.id) {
-                    trip.bestScore = bestTrip.bestScore;
-                }
-            }
-        }
-        bestTrips.clear();
+        List<RoundTrip> roundTrips = CalculateRoundRoutes.calculateRoundRoutes(roundMoveList);
+        System.out.println("Done");
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovementsMultipleCenters.txt"))) {
-            writer.write("startX;startY;endX;endY;score;bestScore;startId;endId;linestring");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("roundMovementsMultipleCenters1pct.txt"))) {
+            writer.write("startX;startY;score;linestring");
             writer.newLine();
-            for (CalculateRoutes.Trip trip : trips){
-                writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.startPiont.centerId + ";" + trip.entpoint.centerId + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-                writer.newLine();
-                writer.flush();
+            Random random = new Random();
+
+            for (RoundTrip trip : roundTrips) {
+                if (random.nextDouble() > .99) {
+                    writer.write(trip.toString());
+                    writer.newLine();
+                    writer.flush();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("roundMovementsMultipleCenters.txt"))) {
+            writer.write("startX;startY;score;linestring");
+            writer.newLine();
+            Random random = new Random();
+            for (RoundTrip trip : roundTrips) {
+                writer.write(trip.toString());
+                writer.newLine();
+                writer.flush();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        System.out.println("Get direct Movements");
+//        List<Move> directMoveList = new ArrayList<>();
+//        for (Move move : Move.movementsList) {
+//            if (move.routeType.equals(Move.RouteType.direct)) {
+//                directMoveList.add(move);
+//            }
+//        }
+//
+//        List<Move> movementsList = directMoveList;
+//        firms.clear();
+
+//        List<CalculateRoutes.Trip> bestTrips = CalculateRoutes.calculateBestDirectRoutsV2(movementsList);
+////        List<CalculateRoutes.Trip> trips = CalculateRoutes.calculateDirectRoutsV2(movementsList);
+//        List<CalculateRoutes.Trip> trips = CalculateRoutes.findBetterSolutions(movementsList);
+//
+//        for (CalculateRoutes.Trip trip : trips) {
+//            for (CalculateRoutes.Trip bestTrip : bestTrips) {
+//                if (bestTrip.startPiont.id == trip.startPiont.id) {
+//                    trip.bestScore = bestTrip.bestScore;
+//                }
+//            }
+//        }
+//        bestTrips.clear();
+////
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovementsMultipleCenters.txt"))) {
+//            writer.write("startX;startY;endX;endY;score;bestScore;startId;endId;linestring");
+//            writer.newLine();
+//            for (CalculateRoutes.Trip trip : trips){
+//                writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.startPiont.centerId + ";" + trip.entpoint.centerId + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
+//                writer.newLine();
+//                writer.flush();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

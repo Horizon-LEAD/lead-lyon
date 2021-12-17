@@ -24,88 +24,117 @@ public class Move implements Comparable {
     Coord ownCoord;
     double travelDistance;
     RouteType routeType;
-    int logisticType = 0;
-    List<Integer> logisticMatch = new ArrayList<>();
+    int logisticDirectType = 0;
+    int logisticRoundType = 0;
+    List<Integer> logisticDirectMatch = new ArrayList<>();
+    List<Integer> logisticRoundMatch = new ArrayList<>();
 
     enum RouteType {direct, round}
 
-    void setLogistic() {
+    public Move() {
         this.id = idCount++;
-        if (disMove.equals(Movement.enlèvements)) {
-            if (disVeh20.equals(VehicleST20.PL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 1;
-                    logisticMatch = Arrays.asList(7, 13);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 2;
-                    logisticMatch = Arrays.asList(8, 14);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 3;
-                    logisticMatch = Arrays.asList(9, 15);
+    }
+
+    void setLogistic() {
+        if (routeType.equals(RouteType.direct)) {
+            if (disMove.equals(Movement.enlèvements)) {
+                if (disVeh20.equals(VehicleST20.PL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 1;
+                        logisticDirectMatch = Arrays.asList(7);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 2;
+                        logisticDirectMatch = Arrays.asList(8);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 3;
+                        logisticDirectMatch = Arrays.asList(9);
+                    }
+                } else if (disVeh20.equals(VehicleST20.VUL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 4;
+                        logisticDirectMatch = Arrays.asList(10);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 5;
+                        logisticDirectMatch = Arrays.asList(11);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 6;
+                        logisticDirectMatch = Arrays.asList(12);
+                    }
                 }
-            } else if (disVeh20.equals(VehicleST20.VUL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 4;
-                    logisticMatch = Arrays.asList(10, 16);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 5;
-                    logisticMatch = Arrays.asList(11, 17);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 6;
-                    logisticMatch = Arrays.asList(12, 18);
+            } else if (disMove.equals(Movement.livraisons)) {
+                if (disVeh20.equals(VehicleST20.PL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 7;
+                        logisticDirectMatch = Arrays.asList(1, 13);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 8;
+                        logisticDirectMatch = Arrays.asList(2, 14);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 9;
+                        logisticDirectMatch = Arrays.asList(3, 15);
+                    }
+                } else if (disVeh20.equals(VehicleST20.VUL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 10;
+                        logisticDirectMatch = Arrays.asList(4, 16);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 11;
+                        logisticDirectMatch = Arrays.asList(5, 17);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 12;
+                        logisticDirectMatch = Arrays.asList(6, 18);
+                    }
+                }
+            } else if (disMove.equals(Movement.conjointes)) {
+                if (disVeh20.equals(VehicleST20.PL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 13;
+                        logisticDirectMatch = Arrays.asList(7);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 14;
+                        logisticDirectMatch = Arrays.asList(8);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 15;
+                        logisticDirectMatch = Arrays.asList(9);
+                    }
+                } else if (disVeh20.equals(VehicleST20.VUL)) {
+                    if (disMan.equals(Management.CA)) {
+                        logisticDirectType = 16;
+                        logisticDirectMatch = Arrays.asList(10);
+                    } else if (disMan.equals(Management.CPD)) {
+                        logisticDirectType = 17;
+                        logisticDirectMatch = Arrays.asList(11);
+                    } else if (disMan.equals(Management.CPE)) {
+                        logisticDirectType = 18;
+                        logisticDirectMatch = Arrays.asList(12);
+                    }
                 }
             }
-        } else if (disMove.equals(Movement.livraisons)) {
-            if (disVeh20.equals(VehicleST20.PL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 7;
-                    logisticMatch = Arrays.asList(1, 13);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 8;
-                    logisticMatch = Arrays.asList(2, 14);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 9;
-                    logisticMatch = Arrays.asList(3, 15);
-                }
-            } else if (disVeh20.equals(VehicleST20.VUL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 10;
-                    logisticMatch = Arrays.asList(4, 16);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 11;
-                    logisticMatch = Arrays.asList(5, 17);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 12;
-                    logisticMatch = Arrays.asList(6, 18);
-                }
-            }
-        } else if (disMove.equals(Movement.conjointes)) {
-            if (disVeh20.equals(VehicleST20.PL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 13;
-                    logisticMatch = Arrays.asList(7, 1, 13);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 14;
-                    logisticMatch = Arrays.asList(8, 2, 14);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 15;
-                    logisticMatch = Arrays.asList(9, 3, 14);
-                }
-            } else if (disVeh20.equals(VehicleST20.VUL)) {
-                if (disMan.equals(Management.CA)) {
-                    logisticType = 16;
-                    logisticMatch = Arrays.asList(10, 4, 16);
-                } else if (disMan.equals(Management.CPD)) {
-                    logisticType = 17;
-                    logisticMatch = Arrays.asList(11, 5, 17);
-                } else if (disMan.equals(Management.CPE)) {
-                    logisticType = 18;
-                    logisticMatch = Arrays.asList(12, 6, 18);
-                }
+            if (logisticDirectType == 0) {
+                System.out.println("No logistic type was found.");
             }
         }
-        if (logisticType == 0) {
-            System.out.println("No logistic type was found.");
+        if (routeType.equals(RouteType.round)) {
+            if (disVeh20.equals(VehicleST20.PL)) {
+                if (disMan.equals(Management.CA)) {
+                    logisticRoundType = 1;
+                } else if (disMan.equals(Management.CPD)) {
+                    logisticRoundType = 2;
+                } else if (disMan.equals(Management.CPE)) {
+                    logisticRoundType = 3;
+                }
+            } else if (disVeh20.equals(VehicleST20.VUL)) {
+                if (disMan.equals(Management.CA)) {
+                    logisticRoundType = 4;
+                } else if (disMan.equals(Management.CPD)) {
+                    logisticRoundType = 5;
+                } else if (disMan.equals(Management.CPE)) {
+                    logisticRoundType = 6;
+                }
+            }
+            if (logisticRoundType == 0) {
+                System.out.println("No logistic type was found.");
+            }
         }
     }
 
@@ -116,7 +145,7 @@ public class Move implements Comparable {
 
     @Override
     public String toString(){
-        return "Move: " + disMove + "; Vehicle: " + disVeh20 + "; Management: " + disMan + "; Travel Distance: " + travelDistance + ": Logistic Type: " + logisticType;
+        return "Move: " + disMove + "; Vehicle: " + disVeh20 + "; Management: " + disMan + "; Travel Distance: " + travelDistance + ": Logistic Type: " + logisticDirectType;
     }
 
 }
