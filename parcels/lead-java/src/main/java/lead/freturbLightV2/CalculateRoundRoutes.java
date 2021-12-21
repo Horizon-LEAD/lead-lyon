@@ -85,6 +85,7 @@ public class CalculateRoundRoutes {
         double fistMoveDistance = startMove.travelDistance - distance;
         double possibleMoveDistance = endMove.travelDistance - distance;
         return Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
+//        return Math.abs(((startMove.travelDistance + endMove.travelDistance)/2) - distance);
     }
 
 }

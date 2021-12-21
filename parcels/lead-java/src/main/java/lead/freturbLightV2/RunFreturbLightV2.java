@@ -1,6 +1,5 @@
 package lead.freturbLightV2;
 
-import org.checkerframework.checker.units.qual.C;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -9,7 +8,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class RunFreturbLightV2 {
 
@@ -102,8 +100,8 @@ public class RunFreturbLightV2 {
         double cal = 0;
         int moves = trips.size();
         for (CalculateRoutes.Trip trip : trips) {
-            cal += (trip.startPiont.travelDistance + trip.entpoint.travelDistance) / 2;
-            distance += CoordUtils.calcEuclideanDistance(trip.startPiont.ownCoord, trip.entpoint.ownCoord) * 1.4 /1000;
+            cal += (trip.startPoint.travelDistance + trip.entPoint.travelDistance) / 2;
+            distance += CoordUtils.calcEuclideanDistance(trip.startPoint.ownCoord, trip.entPoint.ownCoord) * 1.4 /1000;
         }
         System.out.println(moves);
         System.out.println("pairing:" + distance);

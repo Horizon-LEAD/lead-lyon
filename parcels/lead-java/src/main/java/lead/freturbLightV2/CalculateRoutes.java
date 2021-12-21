@@ -62,6 +62,7 @@ public class CalculateRoutes {
         double fistMoveDistance = firstMove.travelDistance - distance;
         double possibleMoveDistance = possibleMove.travelDistance - distance;
         return Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
+//        return Math.abs(((firstMove.travelDistance + possibleMove.travelDistance)/2) - distance);
     }
 
     public static List<Trip> calculateBestDirectRoutsV2(List<Move> movementsList) {
@@ -85,22 +86,28 @@ public class CalculateRoutes {
         return tripsList;
     }
 
-    static class Trip implements Comparable{
-        Move startPiont;
-        Move entpoint;
+    static class Trip extends Trips implements Comparable {
+        Move startPoint;
+        Move entPoint;
         double score;
         double bestScore;
+        double distanceReal;
+        double distanceTheoretically;
+        int timeSlot = -1;
 
         public Trip(Move startPiont, Move entpoint, double score) {
-            this.startPiont = startPiont;
-            this.entpoint = entpoint;
+            this.startPoint = startPiont;
+            this.entPoint = entpoint;
             this.score = score;
+            distanceReal = (CoordUtils.calcEuclideanDistance(startPiont.ownCoord, entpoint.ownCoord)/1000)*1.4;
+            distanceTheoretically = (startPiont.travelDistance + entpoint.travelDistance)/2;
         }
 
         public Trip(Move startPiont, Move entpoint) {
-            this.startPiont = startPiont;
-            this.entpoint = entpoint;
-            this.score = score;
+            this.startPoint = startPiont;
+            this.entPoint = entpoint;
+            distanceReal = (CoordUtils.calcEuclideanDistance(startPiont.ownCoord, entpoint.ownCoord)/1000)*1.4;
+            distanceTheoretically = (startPiont.travelDistance + entpoint.travelDistance)/2;
         }
 
         @Override
@@ -135,7 +142,7 @@ public class CalculateRoutes {
            Iterator<Trip> iterator = endPoints.iterator();
            Trip tmpTrip = iterator.next();
            boolean found = true;
-           while (initialSolution.usedIds.contains(tmpTrip.entpoint.id) && found) {
+           while (initialSolution.usedIds.contains(tmpTrip.entPoint.id) && found) {
                notOptimalTrips.add(tmpTrip);
                if (!iterator.hasNext()) {
                    found = false;
@@ -199,8 +206,8 @@ public class CalculateRoutes {
         }
 
         void addEndPoint(Trip trip) {
-            solution.put(trip.entpoint.id,trip.startPiont);
-            usedIds.add(trip.entpoint.id);
+            solution.put(trip.entPoint.id,trip.startPoint);
+            usedIds.add(trip.entPoint.id);
             increaseScore(trip.score);
         }
 
@@ -257,8 +264,8 @@ public class CalculateRoutes {
 
     private static Move findMoveWhoTookBestMatch(int id, List<Trip> optimalSolution) {
         for (Trip trip : optimalSolution) {
-            if (trip.entpoint.id == id) {
-                return trip.startPiont;
+            if (trip.entPoint.id == id) {
+                return trip.startPoint;
             }
         }
         return null;
