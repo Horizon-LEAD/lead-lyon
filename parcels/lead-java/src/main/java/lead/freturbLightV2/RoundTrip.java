@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class RoundTrip extends Trips implements Comparable {
+public class RoundTrip implements Trips, Comparable {
 
-    final static int avgStops = 13;
-    final static int avgCAStops = 19;
-    final static int avgCPEStops = 11;
-    final static int avgCPDStops = 9;
+    private final static int avgStops = 13;
+    private final static int avgCAStops = 19;
+    private final static int avgCPEStops = 11;
+    private final static int avgCPDStops = 9;
     public List<Integer> timeSlots = new ArrayList<>();
 
     Move startMove;

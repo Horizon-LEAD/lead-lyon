@@ -7,13 +7,25 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
+/**
+ * filters establishments based on location, number of employees, jurisdiction and shell companies
+ */
 public class FilterFirmsV2 {
 
-    static int amountFirms = 0;
-    static Map<Long, Coord> inLyon = readInLyonFile();
+    private static int amountFirms = 0;
+    private static final Map<Long, Coord> IN_LYON = readInLyonFile();
 
+    /**
+     *filter
+     *
+     * @param firms -  a list with all establishments from the StockEtablissement_utf8.csv file
+     * @param filterFile - location of a file with the study area
+     * @param sirenFile - location of a StockUniteLegale_utf8.csv file, can be found here https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/
+     * @return - a new list with the filtered establishments
+     */
     public static List<FirmDataV2> filter(List<FirmDataV2> firms, String filterFile, String sirenFile) {
         System.out.println("Starting filter firms");
+
 //        System.out.println("Amount of firms before filtering: " + firms.size());
         System.out.println("Amount of firms before filtering: " + amountFirms);
 
@@ -133,7 +145,7 @@ public class FilterFirmsV2 {
             e.printStackTrace();
         }
 
-        System.out.println("Done reading inlyon File");
+        System.out.println("Done reading in Lyon File");
         int count = 0;
 
         Iterator<FirmDataV2> iterator = firms.iterator();
@@ -176,8 +188,8 @@ public class FilterFirmsV2 {
 
     public static boolean checkInLyon(FirmDataV2 firmData) {
         amountFirms++;
-        if (inLyon.get(Long.parseLong(firmData.siret)) != null) {
-            firmData.coord = inLyon.get(Long.parseLong(firmData.siret));
+        if (IN_LYON.get(Long.parseLong(firmData.siret)) != null) {
+            firmData.coord = IN_LYON.get(Long.parseLong(firmData.siret));
             return true;
         }
         return false;

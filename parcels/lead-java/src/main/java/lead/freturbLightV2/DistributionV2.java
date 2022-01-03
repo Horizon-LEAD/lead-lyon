@@ -12,20 +12,20 @@ import static lead.freturbLightV2.DistributionV2.DistributionVehicle.Vehicle.*;
 
 public class DistributionV2 {
 
-    final int st8;
-    final static double TYPE_OF_MOVEMENT = 13.4637;
-    final static double MANAGEMENT_MODE = -1.4543;
-    final static double VEHICLE_TYPE = 3.6464;
-    final static double ACTIVITY_TYPE = 1.9224;
-    final static double DISTANCE = 0.4507;
-    final static int[] ACTIVITY_TYPE_ARRAY = {1, 1, 1, 0, 0, 0, 0, 1};
+    private final int st8;
+    private final static double TYPE_OF_MOVEMENT = 13.4637;
+    private final static double MANAGEMENT_MODE = -1.4543;
+    private final static double VEHICLE_TYPE = 3.6464;
+    private final static double ACTIVITY_TYPE = 1.9224;
+    private final static double DISTANCE = 0.4507;
+    private final static int[] ACTIVITY_TYPE_ARRAY = {1, 1, 1, 0, 0, 0, 0, 1};
 
-    final DistributionMovement disMove;
-    final DistributionVehicle disVeh;
-    final DistributionManagement disMan;
+    private final DistributionMovement disMove;
+    private final DistributionVehicle disVeh;
+    private final DistributionManagement disMan;
 
-    static DistributionV2[] distributions = generateDistributionV2();
-    static DistributionVehicleST20[] distributionVehicles = vehicleDistributionST20();
+    private static DistributionV2[] distributions = generateDistributionV2();
+    private static DistributionVehicleST20[] distributionVehicles = vehicleDistributionST20();
 
     DistributionV2(int st8, DistributionMovement disMove,   DistributionManagement disMan, DistributionVehicle disVeh) {
         this.st8 = st8;
@@ -34,6 +34,13 @@ public class DistributionV2 {
         this.disVeh = disVeh;
     }
 
+    /**
+     * distributes the logistic parameters for each establishment
+     * @param firms - a list with all establishments from the StockEtablissement_utf8.csv file
+     * @param centers - a list with locations of the used centers
+     * @param oneCenter - a boolean that determines whether one or more centers are to be used
+     * @return
+     */
     public static List<FirmDataV2> distributeLogistics(List<FirmDataV2> firms, List<Coord> centers, boolean oneCenter) {
         Random random = new Random(21656368);
         for (FirmDataV2 firm : firms) {
@@ -188,7 +195,7 @@ public class DistributionV2 {
         return distributions;
     }
 
-    static DistributionVehicleST20[] vehicleDistributionST20(){
+    private static DistributionVehicleST20[] vehicleDistributionST20(){
         DistributionVehicleST20[] vehicleST20s = new DistributionVehicleST20[20];
         vehicleST20s[0] = new DistributionVehicleST20(.09, .91);
         vehicleST20s[1] = new DistributionVehicleST20(.08, .92);
@@ -226,7 +233,7 @@ public class DistributionV2 {
         }
     }
 
-     static class DistributionManagement {
+    static class DistributionManagement {
         final double CPD;
         final double CPE;
         final double CA;

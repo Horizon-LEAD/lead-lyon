@@ -1,5 +1,7 @@
 package lead.freturbLightV2;
 
+import org.apache.logging.log4j.Level;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +9,13 @@ import java.util.Map;
 public class CategorisationV2 {
 
     final private static Map<String, Integer> matchingST8 = generateMatchingST8Map();
-    final public static Map<String, St45Class> st45Map = generateST45Map();
+    final private static Map<String, St45Class> st45Map = generateST45Map();
 
+    /**
+     * assigns a st8 and st20 class to all establishments
+     * @param - a list with all establishments from the StockEtablissement_utf8.csv file
+     * @return - a list with all establishments from the StockEtablissement_utf8.csv file with a st8 and st20 category
+     */
     public static List<FirmDataV2> categorise(List<FirmDataV2> firms) {
         System.out.println("Start categorise St8 and St20");
         int count = 0;
@@ -238,7 +245,15 @@ public class CategorisationV2 {
         return st45Map;
     }
 
-    static int generateST20Map(int ST8, int employee) {
+    /**
+     * returns the categories of the st45class
+     * @return - map with an id as key and a st45Class as value
+     */
+    static Map<String, St45Class> getSt45Map()  {
+        return st45Map;
+    }
+
+    static private int generateST20Map(int ST8, int employee) {
         Map<String, String> st8Map = new HashMap<>();
         // fill  the map, data from Adrian Beziat
         {

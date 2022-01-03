@@ -14,6 +14,10 @@ import java.util.Random;
 
 public class FreightPopulation {
 
+    /**
+     * writes a MATSim populations file with the trips as input
+     * @param allWeekDayTrips - a daily time distributed list with trips (direct and round)
+     */
     static void generateMATSimFreightPopulation(List<Trips> allWeekDayTrips) {
 
         Config config = ConfigUtils.createConfig();
@@ -28,8 +32,8 @@ public class FreightPopulation {
             Person person = pf.createPerson(Id.createPersonId("truck_" + personId));
             PopulationUtils.putSubpopulation(person, "freight");
             Plan plan = pf.createPlan();
-            if (trip instanceof CalculateRoutes.Trip) {
-                CalculateRoutes.Trip directTrip = (CalculateRoutes.Trip) trip;
+            if (trip instanceof DirectTrip) {
+                DirectTrip directTrip = (DirectTrip) trip;
                 Activity activity = pf.createActivityFromCoord("truck_operation", directTrip.startPoint.ownCoord);
                 plan.addActivity(activity);
                 Activity activity2 = pf.createActivityFromCoord("truck_operation", directTrip.entPoint.ownCoord);

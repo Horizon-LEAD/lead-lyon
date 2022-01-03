@@ -6,16 +6,16 @@ import java.util.*;
 
 public class CalculateRoutes {
 
-    public static List<Trip> calculateDirectRoutsV2(List<Move> movementsList) {
+    static List<DirectTrip> calculateDirectRoutsV2(List<Move> movementsList) {
         int movementsSize = movementsList.size();
         System.out.println(movementsSize + " direct Movements getting paired");
         Random rnd = new Random(31464645);
-        List<Trip> tripsList = new ArrayList<>();
+        List<DirectTrip> tripsList = new ArrayList<>();
         int size = movementsList.size();
         for (int i = 1; i < size; i++) {
-            Trip trip = getPair(movementsList, rnd);
-            if (trip != null) {
-                tripsList.add(trip);
+            DirectTrip directTrip = getPair(movementsList, rnd);
+            if (directTrip != null) {
+                tripsList.add(directTrip);
             }
             if (i % 10000 == 0) {
                 System.out.println("Done " + i);
@@ -23,19 +23,17 @@ public class CalculateRoutes {
         }
         System.out.println("No Match for " + (movementsSize-(tripsList.size() * 2)) + " movements");
         Collections.sort(tripsList);
-        System.out.println(tripsList.get(0));
-        System.out.println(tripsList.get(tripsList.size() -1 ));
         return tripsList;
     }
 
-    private static Trip getPair(List<Move> movementsList, Random rnd) {
+    private static DirectTrip getPair(List<Move> movementsList, Random rnd) {
         if (movementsList.size() == 0) {
             return null;
         }
         Move firstMove = movementsList.get(rnd.nextInt(movementsList.size()));
         Move bestFit = null;
         double minScore = Double.MAX_VALUE;
-        Trip trip = null;
+        DirectTrip directTrip = null;
         for (Move move : movementsList) {
             double score = scoreConnection(firstMove, move);
             if (score < minScore) {
@@ -46,9 +44,9 @@ public class CalculateRoutes {
         if (minScore != Double.MAX_VALUE) {
             movementsList.remove(bestFit);
             movementsList.remove(firstMove);
-            trip = new Trip(firstMove, bestFit, minScore);
+            directTrip = new DirectTrip(firstMove, bestFit, minScore);
         }
-        return trip;
+        return directTrip;
     }
 
     private static double scoreConnection(Move firstMove, Move possibleMove) {
@@ -65,10 +63,10 @@ public class CalculateRoutes {
 //        return Math.abs(((firstMove.travelDistance + possibleMove.travelDistance)/2) - distance);
     }
 
-    public static List<Trip> calculateBestDirectRoutsV2(List<Move> movementsList) {
+     static List<DirectTrip> calculateBestDirectRoutsV2(List<Move> movementsList) {
         int movementsSize = movementsList.size();
         System.out.println(movementsSize + " best direct Movements getting paired");
-        List<Trip> tripsList = new ArrayList<>();
+        List<DirectTrip> tripsList = new ArrayList<>();
         for (Move startMove : movementsList) {
             double minScore = Double.MAX_VALUE;
             Move bestFit = null;
@@ -79,49 +77,19 @@ public class CalculateRoutes {
                     bestFit = possibleMove;
                 }
             }
-            Trip trip = new Trip(startMove, bestFit);
-            trip.bestScore = minScore;
-            tripsList.add(trip);
+            DirectTrip directTrip = new DirectTrip(startMove, bestFit);
+            directTrip.bestScore = minScore;
+            tripsList.add(directTrip);
         }
         return tripsList;
     }
 
-    static class Trip extends Trips implements Comparable {
-        Move startPoint;
-        Move entPoint;
-        double score;
-        double bestScore;
-        double distanceReal;
-        double distanceTheoretically;
-        int timeSlot = -1;
-
-        public Trip(Move startPiont, Move entpoint, double score) {
-            this.startPoint = startPiont;
-            this.entPoint = entpoint;
-            this.score = score;
-            distanceReal = (CoordUtils.calcEuclideanDistance(startPiont.ownCoord, entpoint.ownCoord)/1000)*1.4;
-            distanceTheoretically = (startPiont.travelDistance + entpoint.travelDistance)/2;
-        }
-
-        public Trip(Move startPiont, Move entpoint) {
-            this.startPoint = startPiont;
-            this.entPoint = entpoint;
-            distanceReal = (CoordUtils.calcEuclideanDistance(startPiont.ownCoord, entpoint.ownCoord)/1000)*1.4;
-            distanceTheoretically = (startPiont.travelDistance + entpoint.travelDistance)/2;
-        }
-
-        @Override
-        public int compareTo(Object o) {
-            return Double.compare(this.score, ((Trip) o).score);
-        }
-
-        @Override
-        public String toString() {
-            return "Score: " + score;
-        }
-    }
-
-    static List<Trip> findBetterSolutions(List<Move> movementsList){
+    /**
+     * creates direct trips from individual movements
+     * @param movementsList - a list of direct movements
+     * @return - a list of direct trips
+     */
+    static List<DirectTrip> findBetterSolutions(List<Move> movementsList){
        List<Move> startMoves = new ArrayList<>();
        List<Move> endMoves = new ArrayList<>();
 
@@ -135,23 +103,23 @@ public class CalculateRoutes {
 
        Collections.shuffle(startMoves);
        Solution initialSolution = new Solution(endMoves);
-       List<Trip> notOptimalTrips = new ArrayList<>();
+       List<DirectTrip> notOptimalDirectTrips = new ArrayList<>();
 
        for (Move startMove : startMoves) {
-           TreeSet<Trip> endPoints = findAllSolution(startMove, endMoves);
-           Iterator<Trip> iterator = endPoints.iterator();
-           Trip tmpTrip = iterator.next();
+           TreeSet<DirectTrip> endPoints = findAllSolution(startMove, endMoves);
+           Iterator<DirectTrip> iterator = endPoints.iterator();
+           DirectTrip tmpDirectTrip = iterator.next();
            boolean found = true;
-           while (initialSolution.usedIds.contains(tmpTrip.entPoint.id) && found) {
-               notOptimalTrips.add(tmpTrip);
+           while (initialSolution.usedIds.contains(tmpDirectTrip.entPoint.id) && found) {
+               notOptimalDirectTrips.add(tmpDirectTrip);
                if (!iterator.hasNext()) {
                    found = false;
                    continue;
                }
-               tmpTrip = iterator.next();
+               tmpDirectTrip = iterator.next();
            }
            if (found) {
-               initialSolution.addEndPoint(tmpTrip);
+               initialSolution.addEndPoint(tmpDirectTrip);
            } else {
                initialSolution.addPairLess(startMove);
            }
@@ -205,10 +173,10 @@ public class CalculateRoutes {
             pairLess.add(move);
         }
 
-        void addEndPoint(Trip trip) {
-            solution.put(trip.entPoint.id,trip.startPoint);
-            usedIds.add(trip.entPoint.id);
-            increaseScore(trip.score);
+        void addEndPoint(DirectTrip directTrip) {
+            solution.put(directTrip.entPoint.id, directTrip.startPoint);
+            usedIds.add(directTrip.entPoint.id);
+            increaseScore(directTrip.score);
         }
 
         void increaseScore(double score) {
@@ -232,8 +200,8 @@ public class CalculateRoutes {
             this.solution.remove(Integer.valueOf(id));
         }
 
-        public List<Trip> getTrips() {
-            List<Trip> trips =  new ArrayList<>();
+        public List<DirectTrip> getTrips() {
+            List<DirectTrip> directTrips =  new ArrayList<>();
             for (Map.Entry<Integer, Move> entry : solution.entrySet()) {
                 Move finalEndMove = null;
                 for (Move endMove : endMoves) {
@@ -241,14 +209,14 @@ public class CalculateRoutes {
                         finalEndMove = endMove;
                     }
                 }
-                trips.add(new Trip(entry.getValue(), finalEndMove, scoreConnection(entry.getValue(), finalEndMove)));
+                directTrips.add(new DirectTrip(entry.getValue(), finalEndMove, scoreConnection(entry.getValue(), finalEndMove)));
             }
-            return  trips;
+            return directTrips;
         }
 
-        public boolean compareScore(Trip optimalTrip, Trip tmpTrip, Move thief, int id, Trip notOptimalTrip) {
-            double scoreOptimal = optimalTrip.score;
-            double scoreTmp = tmpTrip.score;
+        public boolean compareScore(DirectTrip optimalDirectTrip, DirectTrip tmpDirectTrip, Move thief, int id, DirectTrip notOptimalDirectTrip) {
+            double scoreOptimal = optimalDirectTrip.score;
+            double scoreTmp = tmpDirectTrip.score;
             Move finalEndMove = null;
             for (Move endMove : endMoves) {
                 if (endMove.id == id) {
@@ -256,27 +224,27 @@ public class CalculateRoutes {
                 }
             }
             double oldScore = scoreConnection(thief, finalEndMove);
-            double scoreNotOptimal = notOptimalTrip.score;
+            double scoreNotOptimal = notOptimalDirectTrip.score;
             return oldScore + scoreNotOptimal > scoreOptimal + scoreTmp;
         }
     }
 
 
-    private static Move findMoveWhoTookBestMatch(int id, List<Trip> optimalSolution) {
-        for (Trip trip : optimalSolution) {
-            if (trip.entPoint.id == id) {
-                return trip.startPoint;
+    private static Move findMoveWhoTookBestMatch(int id, List<DirectTrip> optimalSolution) {
+        for (DirectTrip directTrip : optimalSolution) {
+            if (directTrip.entPoint.id == id) {
+                return directTrip.startPoint;
             }
         }
         return null;
     }
 
-    private static TreeSet<Trip> findAllSolution(Move move, List<Move> endPoints) {
-        TreeSet<Trip> set = new TreeSet<>();
+    private static TreeSet<DirectTrip> findAllSolution(Move move, List<Move> endPoints) {
+        TreeSet<DirectTrip> set = new TreeSet<>();
         for (Move possibleEndMove : endPoints) {
             double localScore = scoreConnection(move, possibleEndMove);
-            Trip trip = new Trip(move, possibleEndMove, localScore);
-            set.add(trip);
+            DirectTrip directTrip = new DirectTrip(move, possibleEndMove, localScore);
+            set.add(directTrip);
         }
         return set;
     }

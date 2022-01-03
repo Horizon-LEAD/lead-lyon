@@ -2,12 +2,9 @@ package lead.freturbLightV2;
 
 import org.matsim.api.core.v01.Coord;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class RunFreturbLightClean {
 
@@ -82,7 +79,7 @@ public class RunFreturbLightClean {
 
 //        List<CalculateRoutes.Trip> bestTrips = CalculateRoutes.calculateBestDirectRoutsV2(movementsList);
 //        List<CalculateRoutes.Trip> trips = CalculateRoutes.calculateDirectRoutsV2(movementsList);
-        List<CalculateRoutes.Trip> trips = CalculateRoutes.findBetterSolutions(movementsList);
+        List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(movementsList);
 
 //        for (CalculateRoutes.Trip trip : trips) {
 //            for (CalculateRoutes.Trip bestTrip : bestTrips) {
@@ -106,7 +103,7 @@ public class RunFreturbLightClean {
 //        }
 
         System.out.println("Start day and time distribution");
-        List<Trips> allTrips = DayAndTimeDistribution.generateDistribution(trips, roundTrips);
+        List<Trips> allTrips = DayAndTimeDistribution.generateDistribution(directTrips, roundTrips);
         FreightPopulation.generateMATSimFreightPopulation(allTrips);
 
     }

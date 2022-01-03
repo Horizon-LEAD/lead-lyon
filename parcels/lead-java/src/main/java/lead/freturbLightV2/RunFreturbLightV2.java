@@ -14,45 +14,57 @@ public class RunFreturbLightV2 {
     public static void main(String[] args) throws Exception {
 
         String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
-//        String sireneFile = "D:/Praktikum/StockEtablissement_utf8.csv";
         String filterFile = "C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv";
-//        String filterFile = "D:/Praktikum/lyons_coords.csv";
         String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
+
+//        String sireneFile = "D:/Praktikum/StockEtablissement_utf8.csv";
+//        String filterFile = "D:/Praktikum/lyons_coords.csv";
 //        String sirenFile = "D:/Praktikum/StockUniteLegale_utf8.csv";
-        final Coord CENTER = new Coord(842443.74, 6519278.68);
+
+        // if only one center then set to true
         boolean oneCenter = false;
         final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
+        // reads in the sirene file and also filters the location, at the moment the filter file is hard coded and must be changed also in the class
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
-
+        // filters after jurisdiction and shell companies
         FilterFirmsV2.filter(firms, filterFile, sirenFile);
-
+        // categories the establishments in st8 and st20
         CategorisationV2.categorise(firms);
 
+        // calculates the amount movements for each establishment, averaging of movements based on St8 classes
 //        CreateMovementV2.calculateMovements(firms);
+        // corrects the amount of movements so movements per employee ar similar to idf
         CreateMovementV2.calculateMovementsWithCorrection(firms);
 
+        // distributes the logistic type
         DistributionV2.distributeLogistics(firms, CENTERS, oneCenter);
 
         double co = 0;
         for (Move firmDataV2 : Move.movementsList) {
             co += firmDataV2.travelDistance;
         }
+        System.out.println("Total distance travelled: " + co + "km");
 
         double[] kilometer = new double[8];
-        double[] vehicel = new double[8];
         for (Move move : Move.movementsList) {
             if (move.st8 != 0) {
                 double km = move.travelDistance;
                 kilometer[move.st8 -1] = kilometer[move.st8-1] + km;
             }
-            if (move.disVeh20.equals(DistributionV2.DistributionVehicleST20.VehicleST20.VUL) && move.st8 != 0) {
-                vehicel[move.st8-1] = vehicel[move.st8 -1] + 1;
+        }
+        System.out.println("driven kilometer per class"  + Arrays.toString(kilometer));
+
+        System.out.println("Get round Movements");
+        List<Move> roundMoveList = new ArrayList<>();
+        for (Move move : Move.movementsList) {
+            if (move.routeType.equals(Move.RouteType.round)) {
+                roundMoveList.add(move);
             }
         }
-        System.out.println(Arrays.toString(kilometer));
-        System.out.println(Arrays.toString(vehicel  ));
-
+        // calculates round trips
+        List<RoundTrip> roundTrips = CalculateRoundRoutes.calculateRoundRoutes(roundMoveList);
+        System.out.println("Done");
         System.out.println("Get direct Movements");
         List<Move> directMoveList = new ArrayList<>();
         for (Move move : Move.movementsList) {
@@ -60,7 +72,9 @@ public class RunFreturbLightV2 {
                 directMoveList.add(move);
             }
         }
-        List<Move> movementsList = directMoveList;
+        // calculates direct trips
+        List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(directMoveList);
+        System.out.println("Done");
 
         int[] amountFirm = new int[8];
         int[] employeesFirm = new int[8];
@@ -77,85 +91,27 @@ public class RunFreturbLightV2 {
             }
 
         }
-        System.out.println(Arrays.toString(movementsFirm));
-        System.out.println(Arrays.toString(amountFirm));
-        System.out.println(Arrays.toString(employeesFirm));
-
+        System.out.println("Movements for st8 classes " + Arrays.toString(movementsFirm));
+        System.out.println("Amount of establishment for st8 classes " + Arrays.toString(amountFirm));
+        System.out.println("Employees for st8 classes" + Arrays.toString(employeesFirm));
+        System.out.println("Done");
         firms.clear();
 
-//        List<CalculateRoutes.Trip> trips = CalculateRoutes.calculateDirectRouts(movementsList);
-        List<CalculateRoutes.Trip> trips = CalculateRoutes.calculateDirectRoutsV2(movementsList);
+        System.out.println("Start day and time distribution");
+        // splits the weekly information into daily information
+        List<Trips> allTrips = DayAndTimeDistribution.generateDistribution(directTrips, roundTrips);
+        // generates a MATSim population file from the trips
+        FreightPopulation.generateMATSimFreightPopulation(allTrips);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("movements.txt"))) {
-            for (Move trip : movementsList){
-                writer.write("" + trip.ownCoord.getX() + ";" + trip.ownCoord.getY() + ";" + trip.travelDistance);
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        double co1 = 0;
+        for (Move firmDataV2 : directMoveList) {
+            co1 += firmDataV2.travelDistance;
         }
-
-        double distance = 0;
-        double cal = 0;
-        int moves = trips.size();
-        for (CalculateRoutes.Trip trip : trips) {
-            cal += (trip.startPoint.travelDistance + trip.entPoint.travelDistance) / 2;
-            distance += CoordUtils.calcEuclideanDistance(trip.startPoint.ownCoord, trip.entPoint.ownCoord) * 1.4 /1000;
+        System.out.println("Total direct distance travelled: " + co1 + "km");
+        double co2 = 0;
+        for (Move firmDataV2 : roundMoveList) {
+            co2 += firmDataV2.travelDistance;
         }
-        System.out.println(moves);
-        System.out.println("pairing:" + distance);
-        System.out.println("calculated:" + cal);
-
-
-//
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements.txt"))) {
-//            writer.write("startX;startY;endX;endY;score;linestring");
-//            writer.newLine();
-//            for (CalculateRoutes.Trip trip : trips){
-//                writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-//                writer.newLine();
-//                writer.flush();
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements10pct.txt"))) {
-//            writer.write("startX;startY;endX;endY;score;linestring");
-//            writer.newLine();
-//            Random r = new Random(123);
-//            for (CalculateRoutes.Trip trip : trips){
-//                if (r.nextDouble() < 0.1) {
-//                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-//                    writer.newLine();
-//                    writer.flush();
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("directMovements1pct.txt"))) {
-//            writer.write("startX;startY;endX;endY;score;linestring;length");
-//            writer.newLine();
-//            Random r = new Random(123);
-//            for (CalculateRoutes.Trip trip : trips){
-//                if (r.nextDouble() < 0.01) {
-//                    writer.write("" + trip.startPiont.ownCoord.getX() + ";" + trip.startPiont.ownCoord.getY() + ";" + trip.entpoint.ownCoord.getX() + ";" + trip.entpoint.ownCoord.getY() + ";" + trip.score + ";LINESTRING (" + trip.startPiont.ownCoord.getX() + " " + trip.startPiont.ownCoord.getY() + ", " + trip.entpoint.ownCoord.getX() + " " + trip.entpoint.ownCoord.getY() + ")");
-//                    writer.newLine();
-//                    writer.flush();
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-
-
-        System.out.println("Done");
-
+        System.out.println("Total round distance travelled: " + co2 + "km");
     }
-
-
 }

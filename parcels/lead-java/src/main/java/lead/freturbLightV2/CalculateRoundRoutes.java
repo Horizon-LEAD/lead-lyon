@@ -10,13 +10,18 @@ import java.util.Random;
 
 public class CalculateRoundRoutes {
 
-    static Random random = new Random(44555);
+    private static Random random = new Random(44555);
 
-    public static List<RoundTrip> calculateRoundRoutes(List<Move> movementlist) {
-        Collections.shuffle(movementlist, random);
+    /**
+     * creates round trips from individual movements
+     * @param movementList - a list of round movements
+     * @return - a list of round trips
+     */
+    static List<RoundTrip> calculateRoundRoutes(List<Move> movementList) {
+        Collections.shuffle(movementList, random);
         List<Move> plVehicle = new ArrayList<>();
         List<Move> vulVehicle = new ArrayList<>();
-        for (Move move : movementlist) {
+        for (Move move : movementList) {
             if (move.disVeh20.equals(DistributionV2.DistributionVehicleST20.VehicleST20.PL)) {
                 plVehicle.add(move);
             } else {

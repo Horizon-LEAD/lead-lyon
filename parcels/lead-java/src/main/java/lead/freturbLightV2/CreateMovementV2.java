@@ -6,13 +6,18 @@ import java.util.Map;
 
 public class CreateMovementV2 {
 
-    static Map<String, MovementFunction> movementFunctionMap = createMovementFunctionMap();
+    static private Map<String, MovementFunction> movementFunctionMap = createMovementFunctionMap();
 
+    /**
+     * calculates the movements of the establishments, corrects the movements so that the movements per employee are in the range of idf
+     * @param firms - a list with all establishments from the StockEtablissement_utf8.csv file
+     * @throws Exception
+     */
     static void calculateMovementsWithCorrection(List<FirmDataV2> firms) throws Exception {
         for (FirmDataV2 firm : firms) {
             int count = 0;
             double movments = 0;
-            for (CategorisationV2.St45Class st45Class : CategorisationV2.st45Map.values()) {
+            for (CategorisationV2.St45Class st45Class : CategorisationV2.getSt45Map().values()) {
                 if (firm.st8 == st45Class.st8) {
                     movments += selectCorrectFunction(movementFunctionMap.get(st45Class.st45), firm.employees);
                     count++;
@@ -36,11 +41,16 @@ public class CreateMovementV2 {
         }
     }
 
+    /**
+     * calculates the movements of the establishments
+     * @param firms - a list with all establishments from the StockEtablissement_utf8.csv file
+     * @throws Exception
+     */
     static void calculateMovements(List<FirmDataV2> firms) throws Exception {
         for (FirmDataV2 firm : firms) {
             int count = 0;
             double movments = 0;
-            for (CategorisationV2.St45Class st45Class : CategorisationV2.st45Map.values()) {
+            for (CategorisationV2.St45Class st45Class : CategorisationV2.getSt45Map().values()) {
                 if (firm.st8 == st45Class.st8) {
                     movments += selectCorrectFunction(movementFunctionMap.get(st45Class.st45), firm.employees);
                     count++;
@@ -116,7 +126,7 @@ public class CreateMovementV2 {
         return movementFunctionMap;
     }
 
-    static class MovementFunction {
+    private static class MovementFunction {
 
         String type;
         double x;
