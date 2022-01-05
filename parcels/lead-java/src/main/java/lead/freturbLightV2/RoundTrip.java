@@ -12,7 +12,8 @@ public class RoundTrip implements Trips, Comparable {
     private final static int avgCAStops = 19;
     private final static int avgCPEStops = 11;
     private final static int avgCPDStops = 9;
-    public List<Integer> timeSlots = new ArrayList<>();
+    List<Integer> timeSlots = new ArrayList<>();
+    double worstConnection = 0;
 
     Move startMove;
     List<Move> tourPoints = new ArrayList<>();
@@ -50,11 +51,15 @@ public class RoundTrip implements Trips, Comparable {
         }
     }
 
-    void scoreLastFirstConnection(Move m1, Move m2){
+    double scoreConnection(Move m1, Move m2){
         double distance = (CoordUtils.calcEuclideanDistance(m1.ownCoord, m2.ownCoord)/1000) * 1.4;
         double fistMoveDistance = m1.travelDistance - distance;
         double possibleMoveDistance = m2.travelDistance - distance;
-        this.score += Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
+        return Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
+    }
+
+    private void scoreLastFirstConnection(Move m1, Move m2) {
+        this.score += scoreConnection(m1, m2);
     }
 
     void addScore(double score) {
@@ -83,11 +88,30 @@ public class RoundTrip implements Trips, Comparable {
         if (!tourWithOrder.get(tourWithOrder.size()-1).equals(startMove)) {
             System.out.println("last move ist not start move, " + tourWithOrder.size() + ", " + index);
         }
+        findWorstConnection();
     }
+
+    private void findWorstConnection() {
+        Iterator<Move> iterator = this.tourWithOrder.iterator();
+        Move firstMove = iterator.next();
+        while (iterator.hasNext()) {
+            Move secondMove = iterator.next();
+            double score = scoreConnection(firstMove, secondMove);
+            if (worstConnection < score) {
+                worstConnection = score;
+            }
+            firstMove = secondMove;
+        }
+    }
+
+//    @Override
+//    public int compareTo(Object o) {
+//        return Double.compare(this.score, ((RoundTrip) o).score);
+//    }
 
     @Override
     public int compareTo(Object o) {
-        return Double.compare(this.score, ((RoundTrip) o).score);
+        return Double.compare(this.worstConnection, ((RoundTrip) o).worstConnection);
     }
 
     @Override

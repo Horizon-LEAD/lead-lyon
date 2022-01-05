@@ -39,7 +39,7 @@ public class DistributionV2 {
      * @param firms - a list with all establishments from the StockEtablissement_utf8.csv file
      * @param centers - a list with locations of the used centers
      * @param oneCenter - a boolean that determines whether one or more centers are to be used
-     * @return
+     * @return - a list with all establishments from the StockEtablissement_utf8.csv file
      */
     public static List<FirmDataV2> distributeLogistics(List<FirmDataV2> firms, List<Coord> centers, boolean oneCenter) {
         Random random = new Random(21656368);
@@ -146,8 +146,7 @@ public class DistributionV2 {
 
     private static double getSample(double tmpTravelDistance, Random random) {
         double sample = random.nextDouble();
-        double distance = tmpTravelDistance * -Math.log(sample);
-        return distance;
+        return tmpTravelDistance * -Math.log(sample);
     }
 
     private static int getTypeOfMovement(Random random) {

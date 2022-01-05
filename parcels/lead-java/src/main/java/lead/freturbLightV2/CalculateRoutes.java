@@ -6,6 +6,8 @@ import java.util.*;
 
 public class CalculateRoutes {
 
+    static List<Double> scoreList = new ArrayList<>();
+
     static List<DirectTrip> calculateDirectRoutsV2(List<Move> movementsList) {
         int movementsSize = movementsList.size();
         System.out.println(movementsSize + " direct Movements getting paired");
@@ -119,6 +121,7 @@ public class CalculateRoutes {
                tmpDirectTrip = iterator.next();
            }
            if (found) {
+               scoreList.add(tmpDirectTrip.score);
                initialSolution.addEndPoint(tmpDirectTrip);
            } else {
                initialSolution.addPairLess(startMove);

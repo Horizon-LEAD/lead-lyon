@@ -1,5 +1,6 @@
 package lead.freturbLightV2;
 
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -11,6 +12,8 @@ import java.util.Random;
 public class CalculateRoundRoutes {
 
     private static Random random = new Random(44555);
+    private static PoissonDistribution poissonDistribution = new PoissonDistribution(12);
+    static List<Double> scoreList = new ArrayList<>();
 
     /**
      * creates round trips from individual movements
@@ -35,7 +38,6 @@ public class CalculateRoundRoutes {
         buildTrip(vulVehicle, roundTrips);
 
         System.out.println("Start building Trips");
-        int x = 0;
         for (RoundTrip roundTrip : roundTrips) {
             roundTrip.buildTrip();
         }
@@ -45,40 +47,90 @@ public class CalculateRoundRoutes {
 
     private static List<RoundTrip> buildTrip(List<Move> vehicleList, List<RoundTrip> roundTrips) {
         int amountRouts = vehicleList.size() / 12;
+//        int amountRouts = poissonDistribution.sample();
         System.out.println("" + amountRouts + " Routes are created");
-        for (int i = 0; i < amountRouts; i++) {
-            Move startMove = vehicleList.get(random.nextInt(vehicleList.size()));
-            vehicleList.remove(startMove);
-            int index = 1;
-            RoundTrip roundTrip = new RoundTrip();
-            roundTrip.addStop(startMove);
-            List<Coord> visited = new ArrayList<>();
-            visited.add(startMove.ownCoord);
-            while (index < 12) {
-                Move endMove = null;
-                double bestScore = Double.MAX_VALUE;
-                for (Move move : vehicleList) {
-                    double tpmSCore = scoreConnection(startMove, move);
-                    if (tpmSCore < bestScore && !visited.contains(move.ownCoord)) {
-                        bestScore = tpmSCore;
-                        endMove = move;
+        int roundsCreated = 0;
+        while (!vehicleList.isEmpty()) {
+            int tmpTripSize = poissonDistribution.sample();
+            if (tmpTripSize < 3){
+                continue;
+            }
+            if (tmpTripSize < vehicleList.size()) {
+                Move startMove = vehicleList.get(random.nextInt(vehicleList.size()));
+                vehicleList.remove(startMove);
+                int index = 1;
+                RoundTrip roundTrip = new RoundTrip();
+                roundTrip.addStop(startMove);
+                List<Coord> visited = new ArrayList<>();
+                visited.add(startMove.ownCoord);
+                while (index < tmpTripSize) {
+                    Move endMove = null;
+                    double bestScore = Double.MAX_VALUE;
+                    for (Move move : vehicleList) {
+                        double tpmSCore = scoreConnection(startMove, move);
+                        if (tpmSCore < bestScore && !visited.contains(move.ownCoord)) {
+                            bestScore = tpmSCore;
+                            endMove = move;
+                        }
                     }
+                    if (endMove != null) {
+                        visited.add(endMove.ownCoord);
+                        roundTrip.addScore(bestScore);
+                        roundTrip.addStop(endMove);
+                        vehicleList.remove(endMove);
+                    }
+                    index++;
                 }
-                if (endMove != null) {
-                    visited.add(endMove.ownCoord);
-                    roundTrip.addScore(bestScore);
-                    roundTrip.addStop(endMove);
-                    vehicleList.remove(endMove);
+                if (roundTrip.tourPoints.size() == tmpTripSize) {
+                    scoreList.add(roundTrip.score);
+                    roundTrips.add(roundTrip);
+                } else {
+                    System.out.println("mhhh     " + roundTrip.tourPoints.size() + "          " + tmpTripSize);
                 }
-                index++;
+                if (roundsCreated > 1 && roundsCreated % 1000 == 0) {
+                    System.out.println("" + roundsCreated + " Routes created");
+                }
+
+            }else {
+                Move startMove = vehicleList.get(random.nextInt(vehicleList.size()));
+                vehicleList.remove(startMove);
+                int index = 1;
+                RoundTrip roundTrip = new RoundTrip();
+                roundTrip.addStop(startMove);
+                List<Coord> visited = new ArrayList<>();
+                visited.add(startMove.ownCoord);
+                while (index < tmpTripSize) {
+                    Move endMove = null;
+                    double bestScore = Double.MAX_VALUE;
+                    for (Move move : vehicleList) {
+                        double tpmSCore = scoreConnection(startMove, move);
+                        if (tpmSCore < bestScore && !visited.contains(move.ownCoord)) {
+                            bestScore = tpmSCore;
+                            endMove = move;
+                        }
+                    }
+                    if (endMove != null) {
+                        visited.add(endMove.ownCoord);
+                        roundTrip.addScore(bestScore);
+                        roundTrip.addStop(endMove);
+                        vehicleList.remove(endMove);
+                    }
+                    index++;
+                }
+                if (roundTrip.tourPoints.size() == tmpTripSize) {
+                    scoreList.add(roundTrip.score);
+                    roundTrips.add(roundTrip);
+                } else {
+                    System.out.println("mhhh     " + roundTrip.tourPoints.size());
+                }
+                if (roundsCreated > 1 && roundsCreated % 1000 == 0) {
+                    System.out.println("" + roundsCreated + " Routes created");
+                }
             }
-            if (roundTrip.tourPoints.size() == 12) {
-                roundTrips.add(roundTrip);
-            }
-            if (i > 1 && i % 1000 == 0) {
-                System.out.println("" + i + " Routes created");
-            }
+
+            roundsCreated++;
         }
+        System.out.println("" + roundsCreated + " were created in the end");
         return roundTrips;
     }
 

@@ -46,6 +46,18 @@ public class RunFreturbLightV2 {
         }
         System.out.println("Total distance travelled: " + co + "km");
 
+        double[] disQuest = new double[3];
+        for (Move move : Move.movementsList) {
+            if (move.disMan.equals(DistributionV2.DistributionManagement.Management.CPD)){
+                disQuest[0] = disQuest[0] + 1;
+            } else if (move.disMan.equals(DistributionV2.DistributionManagement.Management.CPE)) {
+                disQuest[1] = disQuest[1] + 1;
+            } else {
+                disQuest[2] = disQuest[2] + 1;
+            }
+        }
+        System.out.println("distribution question (CPD, CPE, CA)"  + Arrays.toString(disQuest));
+
         double[] kilometer = new double[8];
         for (Move move : Move.movementsList) {
             if (move.st8 != 0) {
@@ -76,6 +88,30 @@ public class RunFreturbLightV2 {
         List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(directMoveList);
         System.out.println("Done");
 
+        double co1 = 0;
+        for (Move firmDataV2 : directMoveList) {
+            co1 += firmDataV2.travelDistance;
+        }
+        System.out.println("Total direct distance travelled: " + co1 + "km");
+        double co2 = 0;
+        for (Move firmDataV2 : roundMoveList) {
+            co2 += firmDataV2.travelDistance;
+        }
+        System.out.println("Total round distance travelled: " + co2 + "km");
+        double co3 = 0;
+        for (Move firmDataV2 : Move.movementsList) {
+            if (firmDataV2.routeType.equals(Move.RouteType.direct)) {
+                co3 += firmDataV2.travelDistance;
+            }
+        }
+        System.out.println("Total direct travelled: " + co3 + "km");
+        double stops = 0;
+        for (RoundTrip roundTrip : roundTrips) {
+            stops += roundTrip.tourWithOrder.size();
+        }
+        double avgStrops = stops/roundTrips.size();
+        System.out.println("avg. Stops: " + avgStrops);
+
         int[] amountFirm = new int[8];
         int[] employeesFirm = new int[8];
         double[] movementsFirm = new double[8];
@@ -103,15 +139,30 @@ public class RunFreturbLightV2 {
         // generates a MATSim population file from the trips
         FreightPopulation.generateMATSimFreightPopulation(allTrips);
 
-        double co1 = 0;
-        for (Move firmDataV2 : directMoveList) {
-            co1 += firmDataV2.travelDistance;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("scoreOverNumberDirect.txt"))) {
+            writer.write("score");
+            writer.newLine();
+            for (Double score : CalculateRoutes.scoreList){
+                writer.write(""+score);
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        System.out.println("Total direct distance travelled: " + co1 + "km");
-        double co2 = 0;
-        for (Move firmDataV2 : roundMoveList) {
-            co2 += firmDataV2.travelDistance;
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("scoreOverNumberRound.txt"))) {
+            writer.write("score");
+            writer.newLine();
+            for (Double score : CalculateRoundRoutes.scoreList){
+                writer.write(""+score);
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        System.out.println("Total round distance travelled: " + co2 + "km");
-    }
+
+
+        }
 }
