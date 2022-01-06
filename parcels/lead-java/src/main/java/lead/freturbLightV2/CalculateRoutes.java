@@ -244,10 +244,15 @@ public class CalculateRoutes {
 
     private static TreeSet<DirectTrip> findAllSolution(Move move, List<Move> endPoints) {
         TreeSet<DirectTrip> set = new TreeSet<>();
+        int stopTimeWaste = 0;
         for (Move possibleEndMove : endPoints) {
             double localScore = scoreConnection(move, possibleEndMove);
             DirectTrip directTrip = new DirectTrip(move, possibleEndMove, localScore);
             set.add(directTrip);
+            stopTimeWaste++;
+            if (stopTimeWaste == 1000) {
+//                continue;
+            }
         }
         return set;
     }

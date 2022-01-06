@@ -13,7 +13,7 @@ import java.util.*;
 public class FilterFirmsV2 {
 
     private static int amountFirms = 0;
-    private static final Map<Long, Coord> IN_LYON = readInLyonFile();
+    private static final Map<Long, Coord> AREA_FILTER_MAP = readAreaFilterFile();
 
     /**
      *filter
@@ -162,10 +162,12 @@ public class FilterFirmsV2 {
         }
     }
 
-    private static Map<Long, Coord> readInLyonFile() {
+    private static Map<Long, Coord> readAreaFilterFile() {
         Map<Long, Coord> inLyon = new HashMap();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv")))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("idf_coords.csv")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv")))){
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/Praktikum/lyons_coords.csv")))){
 
             String line;
@@ -188,8 +190,8 @@ public class FilterFirmsV2 {
 
     public static boolean checkInLyon(FirmDataV2 firmData) {
         amountFirms++;
-        if (IN_LYON.get(Long.parseLong(firmData.siret)) != null) {
-            firmData.coord = IN_LYON.get(Long.parseLong(firmData.siret));
+        if (AREA_FILTER_MAP.get(Long.parseLong(firmData.siret)) != null) {
+            firmData.coord = AREA_FILTER_MAP.get(Long.parseLong(firmData.siret));
             return true;
         }
         return false;
