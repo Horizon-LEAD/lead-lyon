@@ -95,6 +95,8 @@ public class CalculateRoutes {
        List<Move> startMoves = new ArrayList<>();
        List<Move> endMoves = new ArrayList<>();
 
+       System.out.println((movementsList.size()/2) + " direct Routes are created");
+
        for (Move move : movementsList) {
            if (move.disMove.equals(DistributionV2.DistributionMovement.Movement.livraisons)) {
                endMoves.add(move);
@@ -106,6 +108,8 @@ public class CalculateRoutes {
        Collections.shuffle(startMoves);
        Solution initialSolution = new Solution(endMoves);
        List<DirectTrip> notOptimalDirectTrips = new ArrayList<>();
+
+       int directsCreated = 0;
 
        for (Move startMove : startMoves) {
            TreeSet<DirectTrip> endPoints = findAllSolution(startMove, endMoves);
@@ -123,11 +127,15 @@ public class CalculateRoutes {
            if (found) {
                scoreList.add(tmpDirectTrip.score);
                initialSolution.addEndPoint(tmpDirectTrip);
+               directsCreated++;
            } else {
                initialSolution.addPairLess(startMove);
            }
+           if (directsCreated > 1 && directsCreated % 1000 == 0) {
+               System.out.println("" + directsCreated + " Routes created");
+           }
        }
-
+       System.out.println("" + directsCreated + " were created in the end");
 //       for (Trip notOptimalTrip : notOptimalTrips) {
 //           TreeSet<Trip> notOptimalTripEndPoints = findAllSolution(notOptimalTrip.startPiont, endMoves);
 //           Trip optimalTrip = notOptimalTripEndPoints.first();

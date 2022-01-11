@@ -1,5 +1,6 @@
 package lead.freturbLightV2;
 
+import lead.freturbLight.Categorisation;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -12,8 +13,14 @@ import java.util.Random;
 
 public class RunFreturbLightV2 {
 
-    public static void main(String[] args) throws Exception {
+    static List<Move> directMoveList = new ArrayList<>();
+    static List<Move> roundMovePL = new ArrayList<>();
+    static List<Move> roundMoveVUL = new ArrayList<>();
+    static List<DirectTrip> directTrips = new ArrayList<>();
+    static List<RoundTrip> roundTripsPL = new ArrayList<>();
+    static List<RoundTrip> roundTripsVUl = new ArrayList<>();
 
+    public static void main(String[] args) throws Exception {
 //        String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
         String sireneFile = "StockEtablissement_utf8.csv";
 //        String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
@@ -28,12 +35,17 @@ public class RunFreturbLightV2 {
 
         // Lyon
 //        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv";
+//        String filterFile = "lyons_coords.csv";
 //        final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
         //ile de france
         String filterFile = "idf_coords.csv";
         final List<Coord> CENTERS = Arrays.asList(new Coord(652111.1,6861807.2));
 
+        // nantes
+//        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/nantes_coords.csv";
+//        String filterFile = "nantes_coords.csv";
+//        final List<Coord> CENTERS = Arrays.asList(new Coord(355182.5,6689309.6));
 
         // reads in the sirene file and also filters the location, at the moment the filter file is hard coded and must be changed also in the class
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
@@ -41,11 +53,12 @@ public class RunFreturbLightV2 {
         FilterFirmsV2.filter(firms, filterFile, sirenFile);
         // categories the establishments in st8 and st20
         CategorisationV2.categorise(firms);
-
+        System.out.println(CategorisationV2.isNull + "          " + CategorisationV2.notNull);
+        System.out.println(CategorisationV2.emplo);
         // calculates the amount movements for each establishment, averaging of movements based on St8 classes
-//        CreateMovementV2.calculateMovements(firms);
+        CreateMovementV2.calculateMovements(firms);
         // corrects the amount of movements so movements per employee ar similar to idf
-        CreateMovementV2.calculateMovementsWithCorrection(firms);
+//        CreateMovementV2.calculateMovementsWithCorrection(firms);
 
         // distributes the logistic type
         DistributionV2.distributeLogistics(firms, CENTERS, oneCenter);
@@ -103,20 +116,40 @@ public class RunFreturbLightV2 {
         for (Move move : Move.movementsList) {
             if (move.routeType.equals(Move.RouteType.round)) {
                 roundMoveList.add(move);
+                if (move.disVeh20.equals(DistributionV2.DistributionVehicleST20.VehicleST20.PL)) {
+                    roundMovePL.add(move);
+                } else {
+                    roundMoveVUL.add(move);
+                }
             }
         }
+
         // calculates round trips
-        List<RoundTrip> roundTrips = CalculateRoundRoutes.calculateRoundRoutes(roundMoveList);
+//        List<RoundTrip> roundTrips = CalculateRoundRoutes.calculateRoundRoutes(roundMoveList);
         System.out.println("Done");
         System.out.println("Get direct Movements");
-        List<Move> directMoveList = new ArrayList<>();
+        directMoveList = new ArrayList<>();
         for (Move move : Move.movementsList) {
             if (move.routeType.equals(Move.RouteType.direct)) {
                 directMoveList.add(move);
             }
         }
         // calculates direct trips
-        List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(directMoveList);
+//        List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(directMoveList);
+
+        System.out.println("Start Threads");
+
+        RunParallelizationRoutes t1 = new RunParallelizationRoutes(0);
+        t1.start();
+        RunParallelizationRoutes t2 = new RunParallelizationRoutes(1);
+        t2.start();
+        RunParallelizationRoutes t3 = new RunParallelizationRoutes(2);
+        t3.start();
+
+        t3.join();
+        t2.join();
+        t1.join();
+
         System.out.println("Done");
 
         double co1 = 0;
@@ -135,6 +168,11 @@ public class RunFreturbLightV2 {
                 co3 += firmDataV2.travelDistance;
             }
         }
+
+        List<RoundTrip> roundTrips = new ArrayList<>();
+        roundTrips.addAll(roundTripsPL);
+        roundTrips.addAll(roundTripsVUl);
+
         System.out.println("Total direct travelled: " + co3 + "km");
         double stops = 0;
         for (RoundTrip roundTrip : roundTrips) {
@@ -147,7 +185,7 @@ public class RunFreturbLightV2 {
         // splits the weekly information into daily information
         List<Trips> allTrips = DayAndTimeDistribution.generateDistribution(directTrips, roundTrips);
         // generates a MATSim population file from the trips
-        FreightPopulation.generateMATSimFreightPopulation(allTrips);
+
 
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreOverNumberDirectFinal.txt"))) {
@@ -199,5 +237,31 @@ public class RunFreturbLightV2 {
             e.printStackTrace();
         }
 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_Routes.txt"))) {
+            writer.write("coord");
+            writer.newLine();
+            for (DirectTrip dTrip : directTrips) {
+                writer.write("" + dTrip.startPoint.ownCoord.getX() + "," + dTrip.startPoint.ownCoord.getY() + ":" + dTrip.entPoint.ownCoord.getX() + "," + dTrip.entPoint.ownCoord.getY());
+                writer.newLine();
+                writer.flush();
+            }
+            for (RoundTrip rTrip : roundTrips) {
+                int i = 1;
+                for (Move move : rTrip.tourWithOrder) {
+                    writer.write(move.ownCoord.getX() + "," + move.ownCoord.getY());
+                    if (i < rTrip.tourWithOrder.size()) {
+                        writer.write(":");
+                    }
+                    i++;
+                }
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // generates a MATSim population file from the trips
+        FreightPopulation.generateMATSimFreightPopulation(allTrips);
     }
 }

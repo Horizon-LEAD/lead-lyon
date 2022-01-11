@@ -24,8 +24,8 @@ public class DistributionV2 {
     private final DistributionVehicle disVeh;
     private final DistributionManagement disMan;
 
-    private static DistributionV2[] distributions = generateDistributionV2();
-    private static DistributionVehicleST20[] distributionVehicles = vehicleDistributionST20();
+    private final static DistributionV2[] distributions = generateDistributionV2();
+    private final static DistributionVehicleST20[] distributionVehicles = vehicleDistributionST20();
 
     DistributionV2(int st8, DistributionMovement disMove,   DistributionManagement disMan, DistributionVehicle disVeh) {
         this.st8 = st8;

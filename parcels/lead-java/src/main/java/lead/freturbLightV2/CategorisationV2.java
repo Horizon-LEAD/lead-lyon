@@ -10,6 +10,9 @@ public class CategorisationV2 {
 
     final private static Map<String, Integer> matchingST8 = generateMatchingST8Map();
     final private static Map<String, St45Class> st45Map = generateST45Map();
+    static int isNull = 0;
+    static int notNull= 0;
+    static int emplo = 0;
 
     /**
      * assigns a st8 and st20 class to all establishments
@@ -20,6 +23,7 @@ public class CategorisationV2 {
         System.out.println("Start categorise St8 and St20");
         int count = 0;
         for (FirmDataV2 firm : firms){
+            emplo += firm.employees;
             Integer match = matchingST8.get(firm.ape);
             if (match == null && firm.ape.contains(".")) {
                 String[] codeSplit = firm.ape.split("\\.");
@@ -27,9 +31,11 @@ public class CategorisationV2 {
             }
             if (match == null) {
                 count++;
+                isNull++;
                 firm.st8 = 0;
             } else {
                 firm.st8 = match;
+                notNull++;
                 firm.st20 = generateST20Map(firm.st8, firm.employees);
             }
         }
