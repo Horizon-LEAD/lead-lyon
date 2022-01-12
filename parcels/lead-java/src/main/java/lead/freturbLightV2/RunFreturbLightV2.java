@@ -188,54 +188,54 @@ public class RunFreturbLightV2 {
 
 
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreOverNumberDirectFinal.txt"))) {
-            writer.write("score");
-            writer.newLine();
-            for (Double score : CalculateRoutes.scoreList){
-                writer.write(""+score);
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreOverNumberRoundFinal.txt"))) {
-            writer.write("score");
-            writer.newLine();
-            for (RoundTrip roundTrip : roundTrips){
-//            for (Double score : CalculateRoundRoutes.scoreList){
-                writer.write(""+roundTrip.worstConnection);
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_roundMovementsFinal.txt"))) {
-            writer.write("startX;startY;score;linestring");
-            writer.newLine();
-            for (RoundTrip trip : roundTrips) {
-                writer.write(trip.toString());
-                writer.newLine();
-                writer.flush();
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_directMovementsFinal.txt"))) {
-            writer.write("startX;startY;endX;endY;score;bestScore;distanceReal;distanceTheoretically;startId;endId;linestring");
-            writer.newLine();
-            for (DirectTrip trip : directTrips){
-                writer.write("" + trip.startPoint.ownCoord.getX() + ";" + trip.startPoint.ownCoord.getY() + ";" + trip.entPoint.ownCoord.getX() + ";" + trip.entPoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.distanceReal + ";" + trip.distanceTheoretically + ";" + trip.startPoint.centerId + ";" + trip.entPoint.centerId + ";LINESTRING (" + trip.startPoint.ownCoord.getX() + " " + trip.startPoint.ownCoord.getY() + ", " + trip.entPoint.ownCoord.getX() + " " + trip.entPoint.ownCoord.getY() + ")");
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreOverNumberDirectFinal.txt"))) {
+//            writer.write("score");
+//            writer.newLine();
+//            for (Double score : CalculateRoutes.scoreList){
+//                writer.write(""+score);
+//                writer.newLine();
+//                writer.flush();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreOverNumberRoundFinal.txt"))) {
+//            writer.write("score");
+//            writer.newLine();
+//            for (RoundTrip roundTrip : roundTrips){
+////            for (Double score : CalculateRoundRoutes.scoreList){
+//                writer.write(""+roundTrip.worstConnection);
+//                writer.newLine();
+//                writer.flush();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_roundMovementsFinal.txt"))) {
+//            writer.write("startX;startY;score;linestring");
+//            writer.newLine();
+//            for (RoundTrip trip : roundTrips) {
+//                writer.write(trip.toString());
+//                writer.newLine();
+//                writer.flush();
+//
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_directMovementsFinal.txt"))) {
+//            writer.write("startX;startY;endX;endY;score;bestScore;distanceReal;distanceTheoretically;startId;endId;linestring");
+//            writer.newLine();
+//            for (DirectTrip trip : directTrips){
+//                writer.write("" + trip.startPoint.ownCoord.getX() + ";" + trip.startPoint.ownCoord.getY() + ";" + trip.entPoint.ownCoord.getX() + ";" + trip.entPoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.distanceReal + ";" + trip.distanceTheoretically + ";" + trip.startPoint.centerId + ";" + trip.entPoint.centerId + ";LINESTRING (" + trip.startPoint.ownCoord.getX() + " " + trip.startPoint.ownCoord.getY() + ", " + trip.entPoint.ownCoord.getX() + " " + trip.entPoint.ownCoord.getY() + ")");
+//                writer.newLine();
+//                writer.flush();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_Routes.txt"))) {
             writer.write("coord");

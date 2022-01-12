@@ -49,16 +49,16 @@ public class CategorisationV2 {
         {
             // 1
             {
-                matchingST8.put("01.11z", 1);
-                matchingST8.put("01.49z", 1);
-                matchingST8.put("02.40z", 1);
-                matchingST8.put("81.30z", 1);
+                matchingST8.put("01.11Z", 1);
+                matchingST8.put("01.49Z", 1);
+                matchingST8.put("02.40Z", 1);
+                matchingST8.put("81.30Z", 1);
             }
 
             //2
             {
-                matchingST8.put("84.24z", 2);
-                matchingST8.put("84.25z", 2);
+                matchingST8.put("84.24Z", 2);
+                matchingST8.put("84.25Z", 2);
                 matchingST8.put("91", 2);
                 matchingST8.put("92", 2);
                 matchingST8.put("93", 2);
@@ -68,7 +68,7 @@ public class CategorisationV2 {
                 matchingST8.put("86", 2);
                 matchingST8.put("87", 2);
                 matchingST8.put("88.1", 2);
-                matchingST8.put("71.12b", 2);
+                matchingST8.put("71.12B", 2);
                 matchingST8.put("73", 2);
                 matchingST8.put("82", 2);
                 matchingST8.put("96", 2);
@@ -136,10 +136,10 @@ public class CategorisationV2 {
 
             //5
             {
-                matchingST8.put("47.11c", 5);
-                matchingST8.put("47.11d", 5);
-                matchingST8.put("47.19b", 5);
-                matchingST8.put("47.11f", 5);
+                matchingST8.put("47.11C", 5);
+                matchingST8.put("47.11D", 5);
+                matchingST8.put("47.19B", 5);
+                matchingST8.put("47.11F", 5);
                 matchingST8.put("47.2", 5);
 
                 // 47.2 à 47.7
@@ -155,9 +155,9 @@ public class CategorisationV2 {
             {
                 matchingST8.put("45", 6); // ganz
                 matchingST8.put("47", 6); // ganz
-                matchingST8.put("10.13b", 6);
-                matchingST8.put("10.71c", 6);
-                matchingST8.put("10.71d", 6);
+                matchingST8.put("10.13B", 6);
+                matchingST8.put("10.71C", 6);
+                matchingST8.put("10.71D", 6);
                 //+HCR
             }
 
@@ -184,8 +184,8 @@ public class CategorisationV2 {
 
             //8
             {
-                matchingST8.put("52.29a", 8);
-                matchingST8.put("53.20z", 8);
+                matchingST8.put("52.29A", 8);
+                matchingST8.put("53.20Z", 8);
             }
         }
         return matchingST8;
