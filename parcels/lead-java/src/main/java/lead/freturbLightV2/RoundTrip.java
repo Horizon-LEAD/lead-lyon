@@ -8,17 +8,25 @@ import java.util.List;
 
 public class RoundTrip implements Trips, Comparable {
 
+    private static int sId = 0;
     private final static int avgStops = 13;
     private final static int avgCAStops = 19;
     private final static int avgCPEStops = 11;
     private final static int avgCPDStops = 9;
     List<Integer> timeSlots = new ArrayList<>();
     double worstConnection = 0;
+    double firstConnection = 0;
+    double lastConnection = 0;
+    final int id;
 
     Move startMove;
     List<Move> tourPoints = new ArrayList<>();
     List<Move> tourWithOrder = new ArrayList<>();
     double score = 0;
+
+    RoundTrip() {
+        this.id = sId++;
+    }
 
     void addStop(Move move) {
         tourPoints.add(move);
@@ -53,9 +61,7 @@ public class RoundTrip implements Trips, Comparable {
 
     double scoreConnection(Move m1, Move m2){
         double distance = (CoordUtils.calcEuclideanDistance(m1.ownCoord, m2.ownCoord)/1000) * 1.4;
-        double fistMoveDistance = m1.travelDistance - distance;
-        double possibleMoveDistance = m2.travelDistance - distance;
-        return Math.abs(fistMoveDistance) + Math.abs(possibleMoveDistance);
+        return Math.abs(m1.travelDistance - distance);
     }
 
     private void scoreLastFirstConnection(Move m1, Move m2) {
@@ -67,6 +73,7 @@ public class RoundTrip implements Trips, Comparable {
     }
 
     void buildTrip(){
+        findWorstConnection();
         scoreLastFirstConnection(tourPoints.get(0), tourPoints.get(tourPoints.size() - 1));
         findStartMove();
         int index = tourPoints.indexOf(this.startMove);
@@ -88,15 +95,19 @@ public class RoundTrip implements Trips, Comparable {
         if (!tourWithOrder.get(tourWithOrder.size()-1).equals(startMove)) {
             System.out.println("last move ist not start move, " + tourWithOrder.size() + ", " + index);
         }
-        findWorstConnection();
     }
 
     private void findWorstConnection() {
-        Iterator<Move> iterator = this.tourWithOrder.iterator();
+        Iterator<Move> iterator = this.tourPoints.iterator();
         Move firstMove = iterator.next();
         while (iterator.hasNext()) {
             Move secondMove = iterator.next();
             double score = scoreConnection(firstMove, secondMove);
+            if (firstConnection == 0) {
+                firstConnection = score;
+            } else if (secondMove.equals(startMove)) {
+                lastConnection = score;
+            }
             if (worstConnection < score) {
                 worstConnection = score;
             }
@@ -111,7 +122,7 @@ public class RoundTrip implements Trips, Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return Double.compare(this.worstConnection, ((RoundTrip) o).worstConnection);
+        return Integer.compare(this.id, ((RoundTrip) o).id);
     }
 
     @Override
@@ -122,7 +133,7 @@ public class RoundTrip implements Trips, Comparable {
     private String generateLineStringWKT() {
         String out = ";LINESTRING (";
         for (Move move : tourWithOrder) {
-            out = out + move.ownCoord.getX() + " " +move.ownCoord.getY() + ", ";
+            out = out + move.ownCoord.getX() + " " + move.ownCoord.getY() + ", ";
         }
         out = out + startMove.ownCoord.getX() + " " + startMove.ownCoord.getY() + ")";
         return out;

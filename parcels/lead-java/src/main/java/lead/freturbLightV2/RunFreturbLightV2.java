@@ -6,10 +6,7 @@ import org.matsim.core.utils.geometry.CoordUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class RunFreturbLightV2 {
 
@@ -21,10 +18,10 @@ public class RunFreturbLightV2 {
     static List<RoundTrip> roundTripsVUl = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-//        String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
-        String sireneFile = "StockEtablissement_utf8.csv";
-//        String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
-        String sirenFile = "StockUniteLegale_utf8.csv";
+        String sireneFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
+//        String sireneFile = "StockEtablissement_utf8.csv";
+        String sirenFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockUniteLegale_utf8.csv";
+//        String sirenFile = "StockUniteLegale_utf8.csv";
 
 //        String sireneFile = "D:/Praktikum/StockEtablissement_utf8.csv";
 //        String filterFile = "D:/Praktikum/lyons_coords.csv";
@@ -39,7 +36,8 @@ public class RunFreturbLightV2 {
 //        final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
         //ile de france
-        String filterFile = "idf_coords.csv";
+//        String filterFile = "idf_coords.csv";
+        String filterFile = "D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv";
         final List<Coord> CENTERS = Arrays.asList(new Coord(652111.1,6861807.2));
 
         // nantes
@@ -50,7 +48,7 @@ public class RunFreturbLightV2 {
         // reads in the sirene file and also filters the location, at the moment the filter file is hard coded and must be changed also in the class
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
         // filters after jurisdiction and shell companies
-        FilterFirmsV2.filter(firms, filterFile, sirenFile);
+//        FilterFirmsV2.filter(firms, filterFile, sirenFile);
         // categories the establishments in st8 and st20
         CategorisationV2.categorise(firms);
         System.out.println(CategorisationV2.isNull + "          " + CategorisationV2.notNull);
@@ -137,6 +135,35 @@ public class RunFreturbLightV2 {
         // calculates direct trips
 //        List<DirectTrip> directTrips = CalculateRoutes.findBetterSolutions(directMoveList);
 
+//        List<String> in = ReadSireneFileV2.in;
+//        List<String> out = ReadSireneFileV2.out;
+//        for (String code : out) {
+//            if (code.startsWith("75")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("77")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("78")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("91")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("92")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("93")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("94")) {
+//                System.out.println(code);
+//            }
+//            if (code.startsWith("95")) {
+//                System.out.println(code);
+//            }
+//        }
+
         System.out.println("Start Threads");
 
         RunParallelizationRoutes t1 = new RunParallelizationRoutes(0);
@@ -212,30 +239,30 @@ public class RunFreturbLightV2 {
 //            e.printStackTrace();
 //        }
 //
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_roundMovementsFinal.txt"))) {
-//            writer.write("startX;startY;score;linestring");
-//            writer.newLine();
-//            for (RoundTrip trip : roundTrips) {
-//                writer.write(trip.toString());
-//                writer.newLine();
-//                writer.flush();
-//
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_directMovementsFinal.txt"))) {
-//            writer.write("startX;startY;endX;endY;score;bestScore;distanceReal;distanceTheoretically;startId;endId;linestring");
-//            writer.newLine();
-//            for (DirectTrip trip : directTrips){
-//                writer.write("" + trip.startPoint.ownCoord.getX() + ";" + trip.startPoint.ownCoord.getY() + ";" + trip.entPoint.ownCoord.getX() + ";" + trip.entPoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.distanceReal + ";" + trip.distanceTheoretically + ";" + trip.startPoint.centerId + ";" + trip.entPoint.centerId + ";LINESTRING (" + trip.startPoint.ownCoord.getX() + " " + trip.startPoint.ownCoord.getY() + ", " + trip.entPoint.ownCoord.getX() + " " + trip.entPoint.ownCoord.getY() + ")");
-//                writer.newLine();
-//                writer.flush();
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_roundMovementsFinal.txt"))) {
+            writer.write("startX;startY;score;linestring");
+            writer.newLine();
+            for (RoundTrip trip : roundTrips) {
+                writer.write(trip.toString());
+                writer.newLine();
+                writer.flush();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_directMovementsFinal.txt"))) {
+            writer.write("startX;startY;endX;endY;score;bestScore;distanceReal;distanceTheoretically;startId;endId;linestring");
+            writer.newLine();
+            for (DirectTrip trip : directTrips){
+                writer.write("" + trip.startPoint.ownCoord.getX() + ";" + trip.startPoint.ownCoord.getY() + ";" + trip.entPoint.ownCoord.getX() + ";" + trip.entPoint.ownCoord.getY() + ";" + trip.score + ";" + trip.bestScore + ";" + trip.distanceReal + ";" + trip.distanceTheoretically + ";" + trip.startPoint.centerId + ";" + trip.entPoint.centerId + ";LINESTRING (" + trip.startPoint.ownCoord.getX() + " " + trip.startPoint.ownCoord.getY() + ", " + trip.entPoint.ownCoord.getX() + " " + trip.entPoint.ownCoord.getY() + ")");
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_Routes.txt"))) {
             writer.write("coord");
@@ -254,6 +281,18 @@ public class RunFreturbLightV2 {
                     }
                     i++;
                 }
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreFL.txt"))) {
+            writer.write("score");
+            writer.newLine();
+            for (RoundTrip roundTrip : roundTrips){
+                writer.write(String.valueOf(roundTrip.lastConnection - roundTrip.firstConnection));
                 writer.newLine();
                 writer.flush();
             }

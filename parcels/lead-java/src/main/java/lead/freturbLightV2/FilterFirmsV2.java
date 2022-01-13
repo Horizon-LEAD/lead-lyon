@@ -167,10 +167,11 @@ public class FilterFirmsV2 {
 
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Input_Tabellen/nantes_coords.csv")))){
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("lyons_coords.csv")))){
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("idf_coords.csv")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("idf_coords.csv")))){
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("nantes_coords.csv")))){
-//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv")))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv")))){
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv")))){
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/Praktikum/lyons_coords.csv")))){
 
             String line;

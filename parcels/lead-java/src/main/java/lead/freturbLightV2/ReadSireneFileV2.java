@@ -12,6 +12,9 @@ import java.util.List;
  */
 public class ReadSireneFileV2 {
 
+    static List<String> in = new ArrayList<>();
+    static List<String> out = new ArrayList<>();
+
     /**
      * reads a StockEtablissement_utf8.csv file from the french government and creates a firmData object for establishments where complete information is available, file can be found here: https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/
      * @param - sireneFile csv-File with all establishments
@@ -44,6 +47,13 @@ public class ReadSireneFileV2 {
                     );
                     if (FilterFirmsV2.checkInLyon(firmData)) {
                         firms.add(firmData);
+                        if (!in.contains(row.get(header.indexOf("codePostalEtablissement")))) {
+                            in.add(row.get(header.indexOf("codePostalEtablissement")));
+                        }
+                    } else {
+                        if (!out.contains(row.get(header.indexOf("codePostalEtablissement")))) {
+                            out.add(row.get(header.indexOf("codePostalEtablissement")));
+                        }
                     }
                 } else {
                     incomplete++;
