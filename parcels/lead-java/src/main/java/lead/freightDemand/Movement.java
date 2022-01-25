@@ -1,32 +1,24 @@
-package lead.freturbLightV2;
+package lead.freightDemand;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CreateMovementV2 {
+public class Movement {
 
     static private Map<String, MovementFunction> movementFunctionMap = createMovementFunctionMap();
 
-    /**
-     * calculates the movements of the establishments
-     * @param firms - a list with all establishments from the StockEtablissement_utf8.csv file
-     * @throws Exception
-     */
-    static void calculateMovements(List<FirmDataV2> firms) throws Exception {
-        for (FirmDataV2 firm : firms) {
-            int count = 0;
-            double movments = 0;
-            for (CategorisationV2.St45Class st45Class : CategorisationV2.getSt45Map().values()) {
-                if (firm.st8 == st45Class.st8) {
-                    movments += selectCorrectFunction(movementFunctionMap.get(st45Class.st45), firm.employees);
-                    count++;
-                }
-            }
-            if (count != 0) {
-                firm.movements = (int) Math.round(movments / (count));
+    static void calculateMovements(List<FreightFacility> freightFacilityList) throws Exception {
+        int count = 0;
+        for (FreightFacility freightFacility : freightFacilityList) {
+            try {
+                freightFacility.movements = selectCorrectFunction(movementFunctionMap.get(freightFacility.getSt45()), freightFacility.getEmployees());
+            } catch (Exception e) {
+                count++;
+                continue;
             }
         }
+        System.out.println("APE ist empty: " + count);
     }
 
     private static double selectCorrectFunction(MovementFunction movementFunction, int employees) throws Exception {
@@ -106,4 +98,5 @@ public class CreateMovementV2 {
         }
 
     }
+
 }

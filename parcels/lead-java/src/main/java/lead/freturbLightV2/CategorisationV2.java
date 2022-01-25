@@ -2,6 +2,7 @@ package lead.freturbLightV2;
 
 import org.apache.logging.log4j.Level;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,11 @@ public class CategorisationV2 {
     static int isNull = 0;
     static int notNull= 0;
     static int emplo = 0;
+    static int alll = 0;
+    static List<String> all = new ArrayList<>();
+    static Map<String, Integer> allMap = new HashMap<>();
+    static List<String> few = new ArrayList<>();
+    static Map<String, Integer> fewMap = new HashMap<>();
 
     /**
      * assigns a st8 and st20 class to all establishments
@@ -25,6 +31,16 @@ public class CategorisationV2 {
         for (FirmDataV2 firm : firms){
             emplo += firm.employees;
             Integer match = matchingST8.get(firm.ape);
+            if (match == null) {
+                if (allMap.get(firm.ape) == null) {
+                    allMap.put(firm.ape, 1);
+                } else {
+                    int x = allMap.get(firm.ape);
+                    x++;
+                    allMap.put(firm.ape, x);
+                }
+                all.add(firm.ape);
+            }
             if (match == null && firm.ape.contains(".")) {
                 String[] codeSplit = firm.ape.split("\\.");
                 match = matchingST8.get(codeSplit[0]);
@@ -33,6 +49,14 @@ public class CategorisationV2 {
                 count++;
                 isNull++;
                 firm.st8 = 0;
+                System.out.println(firm.ape);
+                if (fewMap.get(firm.ape) == null) {
+                    fewMap.put(firm.ape, 1);
+                } else {
+                    int x = fewMap.get(firm.ape);
+                    x++;
+                    fewMap.put(firm.ape, x);
+                }
             } else {
                 firm.st8 = match;
                 notNull++;
@@ -46,148 +70,189 @@ public class CategorisationV2 {
 
     private static Map<String, Integer> generateMatchingST8Map() {
         Map<String, Integer> matchingST8 = new HashMap<>();
-        {
+
             // 1
-            {
-                matchingST8.put("01.11Z", 1);
-                matchingST8.put("01.49Z", 1);
-                matchingST8.put("02.40Z", 1);
-                matchingST8.put("81.30Z", 1);
-            }
+
+            matchingST8.put("01.11Z", 1);
+            matchingST8.put("01.49Z", 1);
+            matchingST8.put("02.40Z", 1);
+            matchingST8.put("81.30Z", 1);
+
+            //own
+            matchingST8.put("01", 1);
+            matchingST8.put("03", 1);
+            matchingST8.put("08", 1);
+            matchingST8.put("02", 1);
+
 
             //2
-            {
-                matchingST8.put("84.24Z", 2);
-                matchingST8.put("84.25Z", 2);
-                matchingST8.put("91", 2);
-                matchingST8.put("92", 2);
-                matchingST8.put("93", 2);
-                matchingST8.put("38", 2);
-                matchingST8.put("39", 2);
-                matchingST8.put("75", 2);
-                matchingST8.put("86", 2);
-                matchingST8.put("87", 2);
-                matchingST8.put("88.1", 2);
-                matchingST8.put("71.12B", 2);
-                matchingST8.put("73", 2);
-                matchingST8.put("82", 2);
-                matchingST8.put("96", 2);
-                matchingST8.put("77", 2);
-                matchingST8.put("79", 2);
-                matchingST8.put("33.1", 2);
-                matchingST8.put("33.2", 2);
-                matchingST8.put("43.2", 2);
-                matchingST8.put("43.3", 2);
-                matchingST8.put("81", 2);
-                matchingST8.put("45.2", 2);
-                matchingST8.put("46.1", 2);
-                matchingST8.put("58", 2);
-                matchingST8.put("59", 2);
-                matchingST8.put("60", 2);
-                matchingST8.put("61", 2);
-                matchingST8.put("63", 2);
-                matchingST8.put("62", 2);
-                matchingST8.put("95", 2);
-                matchingST8.put("90", 2);
-            }
+
+            matchingST8.put("84.24Z", 2);
+            matchingST8.put("84.25Z", 2);
+            matchingST8.put("91", 2);
+            matchingST8.put("92", 2);
+            matchingST8.put("93", 2);
+            matchingST8.put("38", 2);
+            matchingST8.put("39", 2);
+            matchingST8.put("75", 2);
+            matchingST8.put("86", 2);
+            matchingST8.put("87", 2);
+            matchingST8.put("88.1", 2);
+            matchingST8.put("71.12B", 2);
+            matchingST8.put("73", 2);
+            matchingST8.put("82", 2);
+            matchingST8.put("96", 2);
+            matchingST8.put("77", 2);
+            matchingST8.put("79", 2);
+            matchingST8.put("33.1", 2);
+            matchingST8.put("33.2", 2);
+            matchingST8.put("43.2", 2);
+            matchingST8.put("43.3", 2);
+            matchingST8.put("81", 2);
+            matchingST8.put("45.2", 2);
+            matchingST8.put("46.1", 2);
+            matchingST8.put("58", 2);
+            matchingST8.put("59", 2);
+            matchingST8.put("60", 2);
+            matchingST8.put("61", 2);
+            matchingST8.put("63", 2);
+            matchingST8.put("62", 2);
+            matchingST8.put("95", 2);
+            matchingST8.put("90", 2);
+
+            //own
+
 
             //3
-            {
-                matchingST8.put("13", 3);
 
-                // 13 à 18
-                matchingST8.put("14", 3);
-                matchingST8.put("15", 3);
-                matchingST8.put("16", 3);
-                matchingST8.put("17", 3);
+            matchingST8.put("13", 3);
 
-                matchingST8.put("18", 3);
-                matchingST8.put("31", 3);
-                matchingST8.put("32", 3);
-                matchingST8.put("19", 3);
+            // 13 à 18
+            matchingST8.put("14", 3);
+            matchingST8.put("15", 3);
+            matchingST8.put("16", 3);
+            matchingST8.put("17", 3);
 
-                // 19 à 25
-                matchingST8.put("20", 3);
-                matchingST8.put("21", 3);
-                matchingST8.put("22", 3);
-                matchingST8.put("23", 3);
-                matchingST8.put("24", 3);
+            matchingST8.put("18", 3);
+            matchingST8.put("31", 3);
+            matchingST8.put("32", 3);
+            matchingST8.put("19", 3);
 
-                matchingST8.put("25", 3);
-                matchingST8.put("10", 3);
-                matchingST8.put("11", 3);
-                matchingST8.put("12", 3);
-                matchingST8.put("56", 3);
-                matchingST8.put("26", 3);
+            // 19 à 25
+            matchingST8.put("20", 3);
+            matchingST8.put("21", 3);
+            matchingST8.put("22", 3);
+            matchingST8.put("23", 3);
+            matchingST8.put("24", 3);
 
-                // 26 à 30
-                matchingST8.put("27", 3);
-                matchingST8.put("28", 3);
-                matchingST8.put("29", 3);
+            matchingST8.put("25", 3);
+            matchingST8.put("10", 3);
+            matchingST8.put("11", 3);
+            matchingST8.put("12", 3);
+            matchingST8.put("26", 3);
 
-                matchingST8.put("30", 3);
-                matchingST8.put("33", 3);
-            }
+            // 26 à 30
+            matchingST8.put("27", 3);
+            matchingST8.put("28", 3);
+            matchingST8.put("29", 3);
+
+            matchingST8.put("30", 3);
+            matchingST8.put("33", 3);
+
+            //own
+            matchingST8.put("09", 3);
+            matchingST8.put("35", 3);
+            matchingST8.put("41", 3);
+            matchingST8.put("42", 3);
+            matchingST8.put("43", 3);
+            matchingST8.put("07", 3);
+            matchingST8.put("37", 2);
+
 
             //4
-            {
-                matchingST8.put("46", 4); // ganz
-            }
+
+            matchingST8.put("46", 4); // all
+
 
             //5
-            {
-                matchingST8.put("47.11C", 5);
-                matchingST8.put("47.11D", 5);
-                matchingST8.put("47.19B", 5);
-                matchingST8.put("47.11F", 5);
-                matchingST8.put("47.2", 5);
 
-                // 47.2 à 47.7
-                matchingST8.put("47.3", 5);
-                matchingST8.put("47.4", 5);
-                matchingST8.put("47.5", 5);
-                matchingST8.put("47.6", 5);
+            matchingST8.put("47.11C", 5);
+            matchingST8.put("47.11D", 5);
+            matchingST8.put("47.19B", 5);
+            matchingST8.put("47.11F", 5);
+            matchingST8.put("47.2", 5);
 
-                matchingST8.put("47.7", 5);
-            }
+            // 47.2 à 47.7
+            matchingST8.put("47.3", 5);
+            matchingST8.put("47.4", 5);
+            matchingST8.put("47.5", 5);
+            matchingST8.put("47.6", 5);
+
+            matchingST8.put("47.7", 5);
+
 
             //6
-            {
-                matchingST8.put("45", 6); // ganz
-                matchingST8.put("47", 6); // ganz
-                matchingST8.put("10.13B", 6);
-                matchingST8.put("10.71C", 6);
-                matchingST8.put("10.71D", 6);
-                //+HCR
-            }
 
-            //7
-            {
+            matchingST8.put("45", 6); // all
+            matchingST8.put("47", 6); // all
+            matchingST8.put("10.13B", 6);
+            matchingST8.put("10.71C", 6);
+            matchingST8.put("10.71D", 6);
+
+            //own
+            matchingST8.put("56", 6);
+            matchingST8.put("50", 6);
+            matchingST8.put("53", 6);
+            matchingST8.put("55", 6);
+
+            //+HCR
+
+
+        //7
+
 //            matchingST8.put("10", 7);
-                // 10  à  56
+        // 10  à  56
 //            matchingST8.put("56", 7);
-                matchingST8.put("94", 7);
-                matchingST8.put("64", 7);
-                // 64  à  68
-                matchingST8.put("68", 7);
+        matchingST8.put("94", 7);
+        matchingST8.put("64", 7);
+        // 64  à  68
+        matchingST8.put("68", 7);
 //            matchingST8.put("58", 7);
-                // 58 à 63
+        // 58 à 63
 //            matchingST8.put("63", 7);
-                matchingST8.put("69", 7);
-                // 69 à 82
+        matchingST8.put("69", 7);
+        // 69 à 82
 //            matchingST8.put("82", 7);
-                matchingST8.put("84", 7);
-                matchingST8.put("88", 7);
-                // 84 à 88
-                matchingST8.put("99", 7);
-            }
+        matchingST8.put("84", 7);
+        matchingST8.put("88", 7);
+        // 84 à 88
+        matchingST8.put("99", 7);
 
-            //8
-            {
-                matchingST8.put("52.29A", 8);
-                matchingST8.put("53.20Z", 8);
-            }
-        }
+        //own
+        matchingST8.put("49", 7);
+        matchingST8.put("72", 7);
+        matchingST8.put("66", 7);
+        matchingST8.put("78", 7);
+        matchingST8.put("65", 7);
+        matchingST8.put("85", 7);
+        matchingST8.put("80", 7);
+        matchingST8.put("70", 7);
+        matchingST8.put("51", 7);
+        matchingST8.put("71", 7);
+        matchingST8.put("74", 7);
+        matchingST8.put("36", 7);
+
+
+        //8
+
+        matchingST8.put("52", 8);
+        matchingST8.put("53.20Z", 8);
+
+        //own
+        matchingST8.put("50", 8);
+        matchingST8.put("51.21", 8);
+        matchingST8.put("51.21Z", 8);
+
         return matchingST8;
     }
 

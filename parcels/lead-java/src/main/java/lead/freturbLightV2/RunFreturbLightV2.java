@@ -1,12 +1,13 @@
 package lead.freturbLightV2;
 
-import lead.freturbLight.Categorisation;
+import gnu.trove.decorator.TDoubleCharMapDecorator;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.core.utils.geometry.CoordUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.*;
+
+// todo only allow connections with same management mode (CA,CPE,CPD) for direct and round routes
 
 public class RunFreturbLightV2 {
 
@@ -33,26 +34,61 @@ public class RunFreturbLightV2 {
         // Lyon
 //        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/lyons_coords.csv";
 //        String filterFile = "lyons_coords.csv";
+//        String filterFile = "D:/lead/Marc/Freturb_Light/Input_Tabellen/lyons_coords.csv";
 //        final List<Coord> CENTERS = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
 
         //ile de france
-//        String filterFile = "idf_coords.csv";
-        String filterFile = "D:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv";
+        String filterFile = "idf_coords.csv";
+//        String filterFile = "E:/lead/Marc/Freturb_Light/Input_Tabellen/idf_coords.csv";
         final List<Coord> CENTERS = Arrays.asList(new Coord(652111.1,6861807.2));
 
         // nantes
 //        String filterFile = "C:/lead/Marc/Freturb_Light/Filter/nantes_coords.csv";
+//        String filterFile = "D:/lead/Marc/Freturb_Light/Input_Tabellen/nantes_coords.csv";
 //        String filterFile = "nantes_coords.csv";
 //        final List<Coord> CENTERS = Arrays.asList(new Coord(355182.5,6689309.6));
-
+//
         // reads in the sirene file and also filters the location, at the moment the filter file is hard coded and must be changed also in the class
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
         // filters after jurisdiction and shell companies
-//        FilterFirmsV2.filter(firms, filterFile, sirenFile);
+        FilterFirmsV2.filter(firms, filterFile, sirenFile);
         // categories the establishments in st8 and st20
         CategorisationV2.categorise(firms);
-        System.out.println(CategorisationV2.isNull + "          " + CategorisationV2.notNull);
+        System.out.println(CategorisationV2.isNull + "          " + CategorisationV2.notNull + "                 ");
         System.out.println(CategorisationV2.emplo);
+
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ape_few.txt"))) {
+            writer.write("ape;count");
+            writer.newLine();
+            for (Map.Entry<String, Integer> trip : CategorisationV2.fewMap.entrySet()) {
+                writer.write(trip.getKey() + ";" + trip.getValue());
+                writer.newLine();
+                writer.flush();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HashMap<String, Integer> reverseSortedMap = new HashMap<>();
+        CategorisationV2.allMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("ape_all.txt"))) {
+            writer.write("ape;count");
+            for (Map.Entry<String, Integer> trip : reverseSortedMap.entrySet()) {
+                writer.newLine();
+                writer.write(trip.getKey() + ";" + trip.getValue());
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
         // calculates the amount movements for each establishment, averaging of movements based on St8 classes
         CreateMovementV2.calculateMovements(firms);
         // corrects the amount of movements so movements per employee ar similar to idf
@@ -239,7 +275,7 @@ public class RunFreturbLightV2 {
 //            e.printStackTrace();
 //        }
 //
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_roundMovementsFinal.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("nantes_roundMovementsFinal.txt"))) {
             writer.write("startX;startY;score;linestring");
             writer.newLine();
             for (RoundTrip trip : roundTrips) {
@@ -252,7 +288,7 @@ public class RunFreturbLightV2 {
             e.printStackTrace();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_directMovementsFinal.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("nantes_directMovementsFinal.txt"))) {
             writer.write("startX;startY;endX;endY;score;bestScore;distanceReal;distanceTheoretically;startId;endId;linestring");
             writer.newLine();
             for (DirectTrip trip : directTrips){
@@ -264,7 +300,7 @@ public class RunFreturbLightV2 {
             e.printStackTrace();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_Routes.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("nantes_Routes.txt"))) {
             writer.write("coord");
             writer.newLine();
             for (DirectTrip dTrip : directTrips) {
@@ -288,11 +324,11 @@ public class RunFreturbLightV2 {
             e.printStackTrace();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("idf_scoreFL.txt"))) {
-            writer.write("score");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("nantes_scoreFL.txt"))) {
+            writer.write("first;last");
             writer.newLine();
             for (RoundTrip roundTrip : roundTrips){
-                writer.write(String.valueOf(roundTrip.lastConnection - roundTrip.firstConnection));
+                writer.write(String.valueOf(roundTrip.firstConnection + ";" + roundTrip.lastConnection));
                 writer.newLine();
                 writer.flush();
             }

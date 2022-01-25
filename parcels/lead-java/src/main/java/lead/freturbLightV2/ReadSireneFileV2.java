@@ -31,13 +31,12 @@ public class ReadSireneFileV2 {
 
             int count = 0;
             int incomplete = 0;
-
+            int count1 = 0;
             while ((line = reader.readLine()) != null) {
                 List<String> row = Arrays.asList(line.split(","));
-
                 if (header == null) {
                     header = row;
-                } else if (!row.get(header.indexOf("dateDernierTraitementEtablissement")).equals("") && row.size() ==48) {
+                } else if (row.get(header.indexOf("etatAdministratifEtablissement")).equals("A") && row.size() == 48) {
 
                     FirmDataV2 firmData = new FirmDataV2(
                             row.get(header.indexOf("siret")),
@@ -47,13 +46,49 @@ public class ReadSireneFileV2 {
                     );
                     if (FilterFirmsV2.checkInLyon(firmData)) {
                         firms.add(firmData);
-                        if (!in.contains(row.get(header.indexOf("codePostalEtablissement")))) {
-                            in.add(row.get(header.indexOf("codePostalEtablissement")));
-                        }
-                    } else {
-                        if (!out.contains(row.get(header.indexOf("codePostalEtablissement")))) {
-                            out.add(row.get(header.indexOf("codePostalEtablissement")));
-                        }
+                        count1++;
+//                    } else {
+//                          if (row.get(header.indexOf("codeCommuneEtablissement")).startsWith("75")) {
+////                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("77")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("78")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("91")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("92")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("93")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("94")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+//                            if (row.get(header.indexOf("codePostalEtablissement")).startsWith("95")) {
+//                                System.out.println(row.get(header.indexOf("trancheEffectifsEtablissement")));
+//                                count1++;
+//                                firms.add(firmData);
+//                            }
+
                     }
                 } else {
                     incomplete++;
@@ -63,6 +98,7 @@ public class ReadSireneFileV2 {
                     System.out.println("Read: " + (count-1));
                 }
             }
+            System.out.println("Count " + count1);
             System.out.println("Not taken establishments: " + incomplete);
         } catch (Exception e) {
             e.printStackTrace();

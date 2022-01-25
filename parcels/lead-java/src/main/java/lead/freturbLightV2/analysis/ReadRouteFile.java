@@ -18,7 +18,8 @@ public class ReadRouteFile {
         int maxSize = 0;
         int trips = 0;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Status/lyon_Routes.txt")))){
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("D:/lead/Marc/Freturb_Light/Status/idf_Routes.txt")))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("idf_Routes.txt")))){
             String line;
             List<String> header = null;
             while ((line = reader.readLine()) != null) {
@@ -64,18 +65,13 @@ public class ReadRouteFile {
         }
         System.out.println(distance);
 
-        int[] histogram = new int[(maxSize/5) + 1];
+        int[] histogram = new int[(maxSize)];
         for (List<Coord> route : routes) {
             int size = route.size();
             if (size == 2) {
                 continue;
             }
-            int his = 0;
-            while (size > 4) {
-                size -= 5;
-                his++;
-            }
-            histogram[his] = histogram[his] + 1;
+            histogram[route.size()-1] = histogram[route.size()-1] + 1;
         }
 
         System.out.println(Arrays.toString(histogram));

@@ -23,7 +23,7 @@ public class RunFreturbLightClean {
         List<FirmDataV2> firms = ReadSireneFileV2.readFile(sireneFile);
         FilterFirmsV2.filter(firms, filterFile, sirenFile);
         CategorisationV2.categorise(firms);
-        CreateMovementV2.calculateMovementsWithCorrection(firms);
+//        CreateMovementV2.calculateMovementsWithCorrection(firms);
         DistributionV2.distributeLogistics(firms, CENTERS, oneCenter);
 
         System.out.println("Get round Movements");

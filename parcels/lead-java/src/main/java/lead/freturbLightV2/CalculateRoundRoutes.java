@@ -1,6 +1,8 @@
 package lead.freturbLightV2;
 
+import org.apache.commons.math3.distribution.GeometricDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -13,6 +15,7 @@ public class CalculateRoundRoutes {
 
     private static Random random = new Random(44555);
     private static PoissonDistribution poissonDistribution = new PoissonDistribution(12);
+    private static GeometricDistribution geometricDistribution = new GeometricDistribution( 0.083);
     static List<Double> scoreList = new ArrayList<>();
 
     /**
@@ -50,7 +53,7 @@ public class CalculateRoundRoutes {
         System.out.println("" + amountRouts + " Routes are created");
         int roundsCreated = 0;
         while (!vehicleList.isEmpty() && vehicleList.size() > 2) {
-            int tmpTripSize = poissonDistribution.sample();
+            int tmpTripSize = geometricDistribution.sample();
             if (tmpTripSize < 3){
                 continue;
             }

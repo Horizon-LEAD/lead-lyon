@@ -100,12 +100,13 @@ public class RoundTrip implements Trips, Comparable {
     private void findWorstConnection() {
         Iterator<Move> iterator = this.tourPoints.iterator();
         Move firstMove = iterator.next();
+        Move sMove = firstMove;
         while (iterator.hasNext()) {
             Move secondMove = iterator.next();
             double score = scoreConnection(firstMove, secondMove);
             if (firstConnection == 0) {
                 firstConnection = score;
-            } else if (secondMove.equals(startMove)) {
+            } else if (secondMove.equals(sMove)) {
                 lastConnection = score;
             }
             if (worstConnection < score) {
@@ -113,6 +114,8 @@ public class RoundTrip implements Trips, Comparable {
             }
             firstMove = secondMove;
         }
+        firstConnection = scoreConnection(tourPoints.get(0),tourPoints.get(1));
+        lastConnection = scoreConnection(tourPoints.get(tourPoints.size()-2),tourPoints.get(tourPoints.size()-1));
     }
 
 //    @Override
