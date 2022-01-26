@@ -21,6 +21,7 @@ public class FreightFacility {
     private int st8 = 0;
     private String st45 = "";
     double movements = 0;
+    double centerDistance = 0;
 
     public FreightFacility(String siret, String activitePrincipaleEtablissement, String trancheEffectifsEtablissement, String siren, Coord coord) throws Exception {
         this.siret = siret;
