@@ -21,7 +21,7 @@ public class FreightMatsimPopulation {
         Population population = scenario.getPopulation();
 
         int personId = 0;
-
+        int missedPlans = 0;
         for (Trips trip : allWeekDayTrips) {
             Person person = pf.createPerson(Id.createPersonId("truck_" + personId));
             PopulationUtils.putSubpopulation(person, "freight");
@@ -39,19 +39,17 @@ public class FreightMatsimPopulation {
                 RoundTour roundTrip = (RoundTour) trip;
                 Iterator<Integer> iterator = roundTrip.timeSlots.iterator();
                 boolean first = true;
+                if (roundTrip.tourPoints.size() != roundTrip.timeSlots.size() +1 ) {
+
+                }
                 for (Movement move : roundTrip.tourPoints) {
-                    if (move.equals(roundTrip.startPoint)) {
-                        Activity activity = pf.createActivityFromCoord("truck_operation", roundTrip.startPoint.coord);
-                        if (first) {
-                            first = false;
-                            activity.setEndTime(0);
-                            plan.addActivity(activity);
-                            Leg leg = pf.createLeg("freight");
-                            plan.addLeg(leg);
-                        } else {
-//                            activity.setEndTime(23*3600 + 59*60);
-                            plan.addActivity(activity);
-                        }
+                    if (first) {
+                        first = false;
+                        Activity activity = pf.createActivityFromCoord("truck_operation", move.coord);
+                        activity.setEndTime(0);
+                        plan.addActivity(activity);
+                        Leg leg = pf.createLeg("freight");
+                        plan.addLeg(leg);
                     } else {
                         Activity activity2 = pf.createActivityFromCoord("truck_operation", move.coord);
                         activity2.setEndTime(iterator.next());
@@ -60,13 +58,16 @@ public class FreightMatsimPopulation {
                         plan.addLeg(leg);
                     }
                 }
+                Activity activity = pf.createActivityFromCoord("truck_operation", roundTrip.tourPoints.get(0).coord);
+                activity.setEndTime(24*3600);
+                plan.addActivity(activity);
             }
             personId++;
             person.addPlan(plan);
             population.addPerson(person);
         }
-
-        new PopulationWriter(population).write("plans.xml");
+        System.out.println("Missed plans " + missedPlans);
+        new PopulationWriter(population).write(FreightDemand.outputLocation + "_plans.xml");
     }
 
 

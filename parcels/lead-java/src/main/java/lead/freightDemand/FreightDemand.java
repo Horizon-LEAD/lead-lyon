@@ -17,33 +17,59 @@ public class FreightDemand {
     private final String AREA_File;
     private final List<Coord> CENTERS;
 
-    private String outputLocation = "";
+    static String outputLocation = "";
 
-    public FreightDemand (String etablissementFile, String activityClasses, String areaFile, List<Coord> centers) {
+    public FreightDemand (String etablissementFile, String activityClasses, String areaFile, List<Coord> centers, String output) {
         this.ETABLISSEMENT_FILE = etablissementFile;
         this.AREA_File = areaFile;
         this.CENTERS = centers;
         this.ACTIVITY_CLASSES = activityClasses;
+        this.outputLocation = output;
     }
 
     public void run() throws Exception {
         List<FreightFacility> freightFacilityList = ReadFacilitiesFile.read(ETABLISSEMENT_FILE, AREA_File);
-//        ActivityClasses.setActivityClassesOriginal(ACTIVITY_CLASSES, freightFacilityList);
-        ActivityClasses.setActivityClasses(freightFacilityList);
-//        Movement.calculateMovements(freightFacilityList);
-        Movement.calculateMovementsForST8(freightFacilityList);
+        ActivityClasses.setActivityClassesOriginal(ACTIVITY_CLASSES, freightFacilityList);
+//        ActivityClasses.setActivityClasses(freightFacilityList);
+        Movement.calculateMovements(freightFacilityList);
+//        Movement.calculateMovementsForST8(freightFacilityList);
         Movement.distributeProperties(freightFacilityList, CENTERS);
         printEmployees();
         printClasses(freightFacilityList);
-        writeAll();
-        List<Trips> tripsList = creatingToursPreparation();
+//        writeAll();
+        creatingToursPreparation();
+        writeFiles(tripsDirectList, tripsRoundList);
         List<Trips> weekDayTours = DayAndTimeDistribution.generateDistribution(tripsDirectList, tripsRoundList);
         FreightMatsimPopulation.generateMATSimFreightPopulation(weekDayTours);
         System.out.println("Done");
     }
 
-    private List<Trips> creatingToursPreparation() throws InterruptedException {
-        List<Trips> tripsList = new ArrayList<>();
+    private void writeFiles(List<DirectTour> tripsDirectList, List<RoundTour> tripsRoundList) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "roundRoutes_.txt"))) {
+            writer.write("startX;startY;score;distance;linestring");
+            writer.newLine();
+            for (RoundTour trip : tripsRoundList){
+                writer.write(trip.toString());
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "directRoutes_.txt"))) {
+            writer.write("startX;startY;endX;endY;score;distance;linestring");
+            writer.newLine();
+            for (DirectTour trip : tripsDirectList){
+                writer.write(trip.toString());
+                writer.newLine();
+                writer.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void creatingToursPreparation() throws InterruptedException {
         List<Movement> movementListRoundPL_CA = new ArrayList<>();
         List<Movement> movementListRoundPL_CPD = new ArrayList<>();
         List<Movement> movementListRoundPL_CPE = new ArrayList<>();
@@ -133,7 +159,6 @@ public class FreightDemand {
         t10.join();
         t11.join();
         t12.join();
-        return tripsList;
     }
 
     private void writeAll() {

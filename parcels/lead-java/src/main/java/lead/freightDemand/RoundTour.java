@@ -1,30 +1,47 @@
 package lead.freightDemand;
 
+import lead.freturbLightV2.Move;
 import org.apache.commons.math3.distribution.GeometricDistribution;
 import org.matsim.core.utils.geometry.CoordUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class RoundTour implements Trips {
 
     private final static int avgStops = 13;
+//    private static final GeometricDistribution geometricDistributionCA = new GeometricDistribution( 1/19.0);
+//    private static final GeometricDistribution geometricDistributionCPE = new GeometricDistribution( 1/11.0);
+//    private static final GeometricDistribution geometricDistributionCPD = new GeometricDistribution( 1/9.0);
     private static final GeometricDistribution geometricDistributionCA = new GeometricDistribution( 1/19.0);
-    private static final GeometricDistribution geometricDistributionCPE = new GeometricDistribution( 1/11.0);
-    private static final GeometricDistribution geometricDistributionCPD = new GeometricDistribution( 1/9.0);
+    private static final GeometricDistribution geometricDistributionCPE = new GeometricDistribution( 1/9.5);
+    private static final GeometricDistribution geometricDistributionCPD = new GeometricDistribution( 1/8.0);
     List<Integer> timeSlots = new ArrayList<>();
 
     Movement startPoint;
     List<Movement> tourPoints;
 //    List<Movement> tourWithOrder = new ArrayList<>();
     double score;
+    double distance;
 
-    RoundTour(List<Movement> trip, double score) {
+    RoundTour(List<Movement> trip, double score, double distance) {
         this.tourPoints = trip;
         this.score = score;
+        this.distance = distance;
 //        buildTrip();
+    }
+
+    @Override
+    public String toString(){
+        return "" + tourPoints.get(0).coord.getX() + ";" + tourPoints.get(0).coord.getY() + ";" + score + ";" + distance + generateLineStringWKT();
+    }
+
+    private String generateLineStringWKT() {
+        String out = ";LINESTRING (";
+        for (Movement move : tourPoints) {
+            out = out + move.coord.getX() + " " + move.coord.getY() + ", ";
+        }
+        out = out + tourPoints.get(0).coord.getX() + " " + tourPoints.get(0).coord.getY() + ")";
+        return out;
     }
 
 //    private void buildTrip() {
@@ -87,11 +104,19 @@ public class RoundTour implements Trips {
         } else {
             geometricDistribution = geometricDistributionCPD;
         }
-        System.out.println(Math.round(movementList.size()/geometricDistribution.getNumericalMean()) + " round tours getting paired, with vehicle type " + movementList.get(0).disVeh20 + ", management mode " + movementList.get(0).disMan);
+        Movement.DistributionVehicleST20.VehicleST20 vType = movementList.get(0).disVeh20;
+        Movement.DistributionManagement.Management mType = movementList.get(0).disMan;
+        System.out.println("approx. " + Math.round(movementList.size()/geometricDistribution.getNumericalMean()) + " round tours getting paired, with vehicle type " + vType + ", management mode " + mType);
         List<RoundTour> roundTourList = new ArrayList<>();
-        Collections.shuffle(movementList, FreightDemand.random);
+        Collections.sort(movementList);
+        int same = 0;
+        int allTourSize = 0;
+        int size = movementList.size();
         while (!movementList.isEmpty()) {
             int tourSize = geometricDistribution.sample();
+            if (same == 1000000) {
+                movementList.clear();
+            }
             if (tourSize < 3) {
                 continue;
             }
@@ -107,6 +132,7 @@ public class RoundTour implements Trips {
             trip.add(startPoint);
             siret.add(startPoint.siret);
             double overallScore = 0;
+            double distance = 0;
             while(trip.size() < tourSize) {
                 Movement stop = null;
                 double bestScore = Double.MAX_VALUE;
@@ -120,12 +146,15 @@ public class RoundTour implements Trips {
                     }
                 }
                 if (stop != null) {
+                    distance += CoordUtils.calcEuclideanDistance(startPoint.coord, stop.coord)/1000;
                     trip.add(stop);
                     siret.add(stop.siret);
                     startPoint = stop;
                     overallScore += bestScore;
                 } else {
-                    movementList.removeAll(trip);
+                    if (trip.size() == 1) {
+                        movementList.remove(trip.get(0));
+                    }
                     break;
                 }
             }
@@ -143,19 +172,25 @@ public class RoundTour implements Trips {
                     }
                 }
                 if (lastStop != null) {
+                    distance += CoordUtils.calcEuclideanDistance(lastStop.coord, trip.get(0).coord)/1000;
+                    distance += CoordUtils.calcEuclideanDistance(lastStop.coord, trip.get(trip.size()-1).coord)/1000;
                     trip.add(lastStop);
                     overallScore += bestScore;
-                } else {
-                    movementList.removeAll(trip);
-                    break;
                 }
             }
-            movementList.removeAll(trip);
             if (trip.size() == tourSize + 1) {
-                roundTourList.add(new RoundTour(trip, overallScore));
+                roundTourList.add(new RoundTour(trip, overallScore, distance));
+                allTourSize += tourSize;
+                movementList.removeAll(trip);
+                same = 0;
+            } else {
+                same++;
             }
         }
-        System.out.println("paired " + roundTourList.size() + " round tours, with vehicle type " + movementList.get(0).disVeh20 + ", management mode " + movementList.get(0).disMan);
+        double x = roundTourList.size();
+        double avg = allTourSize/x;
+        System.out.println("should paired " + (size/avg) + " round tours, with vehicle type " + vType + ", management mode " + mType + ", average Stops " + avg);
+        System.out.println("paired " + roundTourList.size() + " round tours, with vehicle type " + vType + ", management mode " + mType + ", average Stops " + avg);
         return roundTourList;
     }
 

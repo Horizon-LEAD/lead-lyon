@@ -64,17 +64,17 @@ public class DayAndTimeDistribution {
                 for (int i = hourDistributionCommutative.length; i > 1; i--) {
                     if (pick > hourDistributionCommutative[i-1] && ((DirectTour) trip).timeSlot == -1) {
                         ((DirectTour) trip).timeSlot = i * 3600 + (FreightDemand.random.nextInt(60) * 60) ;
-                        continue;
+                        break;
                     }
                 }
             } else if (trip instanceof RoundTour) {
                 RoundTour roundTrip = (RoundTour) trip;
-                for (int i = 1; i < roundTrip.tourPoints.size(); i++) {
+                for (int i = 0; i < roundTrip.tourPoints.size(); i++) {
                     double pick = FreightDemand.random.nextDouble();
-                    for (int j = hourDistributionCommutative.length; j > 1; j--) {
+                    for (int j = hourDistributionCommutative.length; j > 0; j--) {
                         if (pick > hourDistributionCommutative[j-1] && roundTrip.timeSlots.size() != i) {
                             roundTrip.timeSlots.add(j * 3600 + (FreightDemand.random.nextInt(60) * 60));
-                            continue;
+                            break;
                         }
                     }
                 }

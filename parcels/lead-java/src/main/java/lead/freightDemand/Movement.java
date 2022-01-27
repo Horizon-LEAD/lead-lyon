@@ -6,10 +6,10 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import java.util.*;
 
 
-public class Movement {
+public class Movement implements Comparable {
 
     static private Map<String, MovementFunction> movementFunctionMap = createMovementFunctionMap();
-//    static private Map<String, MovementFunction> movementFunctionMapOriginal = createMovementFunctionMapOriginal();
+    static private Map<String, MovementFunction> movementFunctionMapOriginal = createMovementFunctionMapOriginal();
     static List<Movement> movementList = new ArrayList<>();
 
     private final static Distribution[] distributions = generateDistribution();
@@ -33,6 +33,12 @@ public class Movement {
     final String siren;
     final Coord coord;
     final int st8;
+    int amountMovementsFacility;
+
+    @Override
+    public int compareTo(Object o) {
+        return Integer.compare(((Movement) o).amountMovementsFacility, this.amountMovementsFacility);
+    }
 
     enum RouteType {direct, round}
 
@@ -43,20 +49,21 @@ public class Movement {
         this.siren = freightFacility.siren;
         this.coord = freightFacility.getCoord();
         this.st8 = freightFacility.getSt8();
+        this.amountMovementsFacility = freightFacility.movements;
     }
 
-//    static void calculateMovements(List<FreightFacility> freightFacilityList) throws Exception {
-//        int count = 0;
-//        for (FreightFacility freightFacility : freightFacilityList) {
-//            try {
-//                freightFacility.movements = selectCorrectFunction(movementFunctionMapOriginal.get(freightFacility.getSt45()), freightFacility.getEmployees());
-//            } catch (Exception e) {
-//                count++;
-//                continue;
-//            }
-//        }
-//        System.out.println("APE ist empty: " + count);
-//    }
+    static void calculateMovements(List<FreightFacility> freightFacilityList) throws Exception {
+        int count = 0;
+        for (FreightFacility freightFacility : freightFacilityList) {
+            try {
+                freightFacility.movements = (int) selectCorrectFunction(movementFunctionMapOriginal.get(freightFacility.getSt45()), freightFacility.getEmployees());
+            } catch (Exception e) {
+                count++;
+                continue;
+            }
+        }
+        System.out.println("APE ist empty: " + count);
+    }
 
     static void calculateMovementsForST8(List<FreightFacility> freightFacilityList) throws Exception {
         for (FreightFacility freightFacility : freightFacilityList) {
