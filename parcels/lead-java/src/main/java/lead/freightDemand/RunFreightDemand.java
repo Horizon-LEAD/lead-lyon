@@ -11,14 +11,14 @@ public class RunFreightDemand {
 
         String etablissementFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
 //        String areaFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/nantes_coords.csv";
-        String areaFile = "lyon_coords.csv";
+        String areaFile = "nantes_coords.csv";
         String apeClasses = "corrST45-NAF_MATSIM.csv";
         // idf
 //        List<Coord> centers = Arrays.asList(new Coord(652111.1,6861807.2));
         // nantes
-//        List<Coord> centers = Arrays.asList(new Coord(355182.5,6689309.6));
+        List<Coord> centers = Arrays.asList(new Coord(355182.5,6689309.6));
         // lyon
-        List<Coord> centers = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
+//        List<Coord> centers = Arrays.asList(new Coord(844819.280, 6517939.271), new Coord(913487.627, 6458394.690), new Coord(808804.412, 6484085.296), new Coord(783594.005, 6550352.652), new Coord(872190.579, 6569800.681));
         // touluse
 //        List<Coord> centers = Arrays.asList(new Coord(574309.9,6279302.2));
 
@@ -36,7 +36,7 @@ public class RunFreightDemand {
             } else if (args[2].equals("toulouse")) {
                 centers = Arrays.asList(new Coord(574309.9,6279302.2));
             }
-            output = args[2];
+            output = args[3];
         }
 
         FreightDemand freightDemand = new FreightDemand(etablissementFile, apeClasses, areaFile, centers, output);

@@ -109,13 +109,17 @@ public class RoundTour implements Trips {
         System.out.println("approx. " + Math.round(movementList.size()/geometricDistribution.getNumericalMean()) + " round tours getting paired, with vehicle type " + vType + ", management mode " + mType);
         List<RoundTour> roundTourList = new ArrayList<>();
         Collections.sort(movementList);
+        int start = 0;
         int same = 0;
         int allTourSize = 0;
         int size = movementList.size();
         while (!movementList.isEmpty()) {
             int tourSize = geometricDistribution.sample();
-            if (same == 1000000) {
+            if (same == 100000) {
                 movementList.clear();
+            }
+            if (start >= movementList.size()) {
+                start = 0;
             }
             if (tourSize < 3) {
                 continue;
@@ -126,7 +130,7 @@ public class RoundTour implements Trips {
             if (tourSize > movementList.size()) {
                 tourSize = movementList.size();
             }
-            Movement startPoint = movementList.get(0);
+            Movement startPoint = movementList.get(start);
             List<Movement> trip = new ArrayList<>();
             List<String> siret = new ArrayList<>();
             trip.add(startPoint);
@@ -184,6 +188,7 @@ public class RoundTour implements Trips {
                 movementList.removeAll(trip);
                 same = 0;
             } else {
+                start++;
                 same++;
             }
         }

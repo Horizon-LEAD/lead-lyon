@@ -29,10 +29,10 @@ public class FreightDemand {
 
     public void run() throws Exception {
         List<FreightFacility> freightFacilityList = ReadFacilitiesFile.read(ETABLISSEMENT_FILE, AREA_File);
-        ActivityClasses.setActivityClassesOriginal(ACTIVITY_CLASSES, freightFacilityList);
-//        ActivityClasses.setActivityClasses(freightFacilityList);
-        Movement.calculateMovements(freightFacilityList);
-//        Movement.calculateMovementsForST8(freightFacilityList);
+//        ActivityClasses.setActivityClassesOriginal(ACTIVITY_CLASSES, freightFacilityList);
+        ActivityClasses.setActivityClasses(freightFacilityList);
+//        Movement.calculateMovements(freightFacilityList);
+        Movement.calculateMovementsForST8(freightFacilityList);
         Movement.distributeProperties(freightFacilityList, CENTERS);
         printEmployees();
         printClasses(freightFacilityList);

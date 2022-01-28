@@ -9,7 +9,7 @@ import java.util.*;
 public class Movement implements Comparable {
 
     static private Map<String, MovementFunction> movementFunctionMap = createMovementFunctionMap();
-    static private Map<String, MovementFunction> movementFunctionMapOriginal = createMovementFunctionMapOriginal();
+    static private Map<String, MovementFunctionOriginal> movementFunctionMapOriginal = createMovementFunctionMapOriginal();
     static List<Movement> movementList = new ArrayList<>();
 
     private final static Distribution[] distributions = generateDistribution();
@@ -56,7 +56,7 @@ public class Movement implements Comparable {
         int count = 0;
         for (FreightFacility freightFacility : freightFacilityList) {
             try {
-                freightFacility.movements = (int) selectCorrectFunction(movementFunctionMapOriginal.get(freightFacility.getSt45()), freightFacility.getEmployees());
+                freightFacility.movements = (int) selectCorrectFunctionOriginal(movementFunctionMapOriginal.get(freightFacility.getSt45()), freightFacility.getEmployees());
             } catch (Exception e) {
                 count++;
                 continue;
@@ -75,14 +75,29 @@ public class Movement implements Comparable {
                     count++;
                 }
             }
-            if (count != 0) {
-                freightFacility.movements = (int) Math.round(movments / (count));
-            }
+//            if (count != 0) {
+//                freightFacility.movements = (int) Math.round(movments / (count));
+//            }
+            freightFacility.movements = (int)  Math.round(movments);
         }
     }
 
 
     private static double selectCorrectFunction(MovementFunction movementFunction, int employees) throws Exception {
+        if (movementFunction.type.equals("RATIO_Constant_LAET")) {
+            return (movementFunction.x * employees) * movementFunction.z;
+        } else if (movementFunction.type.equals("FUNCTION_LIN")) {
+            return (movementFunction.x * employees + movementFunction.y) * movementFunction.z;
+        } else if (movementFunction.type.equals("FUNCTION_LOG")) {
+            return (movementFunction.x * Math.log(employees) + movementFunction.y) * movementFunction.z;
+        } else if (movementFunction.type.equals("FUNCTION_LOG_NO_CONS")) {
+            return (movementFunction.x * Math.log(employees)) * movementFunction.z;
+        } else {
+            throw new Exception("no function type for this establishment");
+        }
+    }
+
+    private static double selectCorrectFunctionOriginal(MovementFunctionOriginal movementFunction, int employees) throws Exception {
         if (movementFunction.type.equals("RATIO_Constant_LAET")) {
             return movementFunction.x * employees;
         } else if (movementFunction.type.equals("FUNCTION_LIN")) {
@@ -96,103 +111,110 @@ public class Movement implements Comparable {
         }
     }
 
-    private static Map<String, MovementFunction> createMovementFunctionMapOriginal() {
-        Map<String, MovementFunction> movementFunctionMap = new HashMap<>();
-        movementFunctionMap.put("1", new MovementFunction("FUNCTION_LOG_NO_CONS",2.396,0));
-        movementFunctionMap.put("2-2", new MovementFunction("FUNCTION_LOG",1.933,14.307));
-        movementFunctionMap.put("2-3", new MovementFunction("FUNCTION_LIN",3.132,-2.2));
-        movementFunctionMap.put("2-4", new MovementFunction("FUNCTION_LIN",0.789,2.492));
-        movementFunctionMap.put("26Ha", new MovementFunction("FUNCTION_LOG",6.416,0.195));
-        movementFunctionMap.put("26Mi", new MovementFunction("FUNCTION_LIN",0.101,1.628));
-        movementFunctionMap.put("26Mo", new MovementFunction("FUNCTION_LIN",0.14,5.059));
-        movementFunctionMap.put("3", new MovementFunction("FUNCTION_LIN",1.536,3.077));
-        movementFunctionMap.put("4-2", new MovementFunction("FUNCTION_LIN",1.172,6.893));
-        movementFunctionMap.put("5-2", new MovementFunction("FUNCTION_LOG",1.045,13.342));
-        movementFunctionMap.put("5-4", new MovementFunction("FUNCTION_LOG_NO_CONS",6.246,0));
-        movementFunctionMap.put("5-5", new MovementFunction("FUNCTION_LIN",1.8,0.719));
-        movementFunctionMap.put("4-6", new MovementFunction("RATIO_Constant_LAET",2.59,0));
-        movementFunctionMap.put("4-7", new MovementFunction("FUNCTION_LIN",0.176,8.75));
-        movementFunctionMap.put("34-2", new MovementFunction("FUNCTION_LIN",0.614,19.720));
-        movementFunctionMap.put("34-3", new MovementFunction("FUNCTION_LIN",0.352,7.574));
-        movementFunctionMap.put("7-2", new MovementFunction("FUNCTION_LOG",15.086,0.026));
-        movementFunctionMap.put("8-2", new MovementFunction("RATIO_Constant_LAET",2.57,0));
-        movementFunctionMap.put("9-2", new MovementFunction("RATIO_Constant_LAET",7.62,0));
-        movementFunctionMap.put("7-3", new MovementFunction("RATIO_Constant_LAET",2.3,0));
-        movementFunctionMap.put("8-3", new MovementFunction("RATIO_Constant_LAET",2.52,0));
-        movementFunctionMap.put("9-3", new MovementFunction("FUNCTION_LOG",19.31,10.01));
-        movementFunctionMap.put("10", new MovementFunction("FUNCTION_LIN",0.108,79.785));
-        movementFunctionMap.put("11", new MovementFunction("FUNCTION_LIN",0.961,0.793));
-        movementFunctionMap.put("12", new MovementFunction("FUNCTION_LOG_NO_CONS",10.626,0));
-        movementFunctionMap.put("13", new MovementFunction("RATIO_Constant_LAET",1.57,0));
-        movementFunctionMap.put("14", new MovementFunction("FUNCTION_LOG_NO_CONS",3.029,0));
-        movementFunctionMap.put("15", new MovementFunction("FUNCTION_LOG",5.124,3.362));
-        movementFunctionMap.put("16", new MovementFunction("RATIO_Constant_LAET",1.55,0));
-        movementFunctionMap.put("17", new MovementFunction("FUNCTION_LOG",1.057,5.364));
-        movementFunctionMap.put("18", new MovementFunction("FUNCTION_LIN",0.329,4.277));
-        movementFunctionMap.put("19", new MovementFunction("FUNCTION_LOG",4.437,12.43));
-        movementFunctionMap.put("20", new MovementFunction("FUNCTION_LOG",0.107,3.3347));
-        movementFunctionMap.put("21", new MovementFunction("FUNCTION_LIN",1.413,0.685));
-        movementFunctionMap.put("22", new MovementFunction("FUNCTION_LOG",4.998,16.764));
-        movementFunctionMap.put("23", new MovementFunction("FUNCTION_LOG",3.304,2.748));
-        movementFunctionMap.put("29", new MovementFunction("FUNCTION_LOG",-0.681,5.015));
-        movementFunctionMap.put("6", new MovementFunction("FUNCTION_LOG",0.795,1.053));
-        movementFunctionMap.put("25", new MovementFunction("FUNCTION_LIN",0.074,1.801));
-        movementFunctionMap.put("27-2", new MovementFunction("RATIO_Constant_LAET",0.64,0));
-        movementFunctionMap.put("27-3", new MovementFunction("FUNCTION_LOG_NO_CONS",4.657,0));
-        movementFunctionMap.put("26Fa", new MovementFunction("FUNCTION_LIN",0.157,1.941));
-        movementFunctionMap.put("30", new MovementFunction("RATIO_Constant_LAET",12.12,0));
-        movementFunctionMap.put("28-2", new MovementFunction("RATIO_Constant_LAET",4.37,0));
-        movementFunctionMap.put("28-3", new MovementFunction("FUNCTION_LIN",4.841,9.429));
+    private static Map<String, MovementFunctionOriginal> createMovementFunctionMapOriginal() {
+        Map<String, MovementFunctionOriginal> movementFunctionMap = new HashMap<>();
+        movementFunctionMap.put("1", new MovementFunctionOriginal("FUNCTION_LOG_NO_CONS",2.396,0));
+        movementFunctionMap.put("2-2", new MovementFunctionOriginal("FUNCTION_LOG",1.933,14.307));
+        movementFunctionMap.put("2-3", new MovementFunctionOriginal("FUNCTION_LIN",3.132,-2.2));
+        movementFunctionMap.put("2-4", new MovementFunctionOriginal("FUNCTION_LIN",0.789,2.492));
+        movementFunctionMap.put("26Ha", new MovementFunctionOriginal("FUNCTION_LOG",6.416,0.195));
+        movementFunctionMap.put("26Mi", new MovementFunctionOriginal("FUNCTION_LIN",0.101,1.628));
+        movementFunctionMap.put("26Mo", new MovementFunctionOriginal("FUNCTION_LIN",0.14,5.059));
+        movementFunctionMap.put("3", new MovementFunctionOriginal("FUNCTION_LIN",1.536,3.077));
+        movementFunctionMap.put("4-2", new MovementFunctionOriginal("FUNCTION_LIN",1.172,6.893));
+        movementFunctionMap.put("5-2", new MovementFunctionOriginal("FUNCTION_LOG",1.045,13.342));
+        movementFunctionMap.put("5-4", new MovementFunctionOriginal("FUNCTION_LOG_NO_CONS",6.246,0));
+        movementFunctionMap.put("5-5", new MovementFunctionOriginal("FUNCTION_LIN",1.8,0.719));
+        movementFunctionMap.put("4-6", new MovementFunctionOriginal("RATIO_Constant_LAET",2.59,0));
+        movementFunctionMap.put("4-7", new MovementFunctionOriginal("FUNCTION_LIN",0.176,8.75));
+        movementFunctionMap.put("34-2", new MovementFunctionOriginal("FUNCTION_LIN",0.614,19.720));
+        movementFunctionMap.put("34-3", new MovementFunctionOriginal("FUNCTION_LIN",0.352,7.574));
+        movementFunctionMap.put("7-2", new MovementFunctionOriginal("FUNCTION_LOG",15.086,0.026));
+        movementFunctionMap.put("8-2", new MovementFunctionOriginal("RATIO_Constant_LAET",2.57,0));
+        movementFunctionMap.put("9-2", new MovementFunctionOriginal("RATIO_Constant_LAET",7.62,0));
+        movementFunctionMap.put("7-3", new MovementFunctionOriginal("RATIO_Constant_LAET",2.3,0));
+        movementFunctionMap.put("8-3", new MovementFunctionOriginal("RATIO_Constant_LAET",2.52,0));
+        movementFunctionMap.put("9-3", new MovementFunctionOriginal("FUNCTION_LOG",19.31,10.01));
+        movementFunctionMap.put("10", new MovementFunctionOriginal("FUNCTION_LIN",0.108,79.785));
+        movementFunctionMap.put("11", new MovementFunctionOriginal("FUNCTION_LIN",0.961,0.793));
+        movementFunctionMap.put("12", new MovementFunctionOriginal("FUNCTION_LOG_NO_CONS",10.626,0));
+        movementFunctionMap.put("13", new MovementFunctionOriginal("RATIO_Constant_LAET",1.57,0));
+        movementFunctionMap.put("14", new MovementFunctionOriginal("FUNCTION_LOG_NO_CONS",3.029,0));
+        movementFunctionMap.put("15", new MovementFunctionOriginal("FUNCTION_LOG",5.124,3.362));
+        movementFunctionMap.put("16", new MovementFunctionOriginal("RATIO_Constant_LAET",1.55,0));
+        movementFunctionMap.put("17", new MovementFunctionOriginal("FUNCTION_LOG",1.057,5.364));
+        movementFunctionMap.put("18", new MovementFunctionOriginal("FUNCTION_LIN",0.329,4.277));
+        movementFunctionMap.put("19", new MovementFunctionOriginal("FUNCTION_LOG",4.437,12.43));
+        movementFunctionMap.put("20", new MovementFunctionOriginal("FUNCTION_LOG",0.107,3.3347));
+        movementFunctionMap.put("21", new MovementFunctionOriginal("FUNCTION_LIN",1.413,0.685));
+        movementFunctionMap.put("22", new MovementFunctionOriginal("FUNCTION_LOG",4.998,16.764));
+        movementFunctionMap.put("23", new MovementFunctionOriginal("FUNCTION_LOG",3.304,2.748));
+        movementFunctionMap.put("29", new MovementFunctionOriginal("FUNCTION_LOG",-0.681,5.015));
+        movementFunctionMap.put("6", new MovementFunctionOriginal("FUNCTION_LOG",0.795,1.053));
+        movementFunctionMap.put("25", new MovementFunctionOriginal("FUNCTION_LIN",0.074,1.801));
+        movementFunctionMap.put("27-2", new MovementFunctionOriginal("RATIO_Constant_LAET",0.64,0));
+        movementFunctionMap.put("27-3", new MovementFunctionOriginal("FUNCTION_LOG_NO_CONS",4.657,0));
+        movementFunctionMap.put("26Fa", new MovementFunctionOriginal("FUNCTION_LIN",0.157,1.941));
+        movementFunctionMap.put("30", new MovementFunctionOriginal("RATIO_Constant_LAET",12.12,0));
+        movementFunctionMap.put("28-2", new MovementFunctionOriginal("RATIO_Constant_LAET",4.37,0));
+        movementFunctionMap.put("28-3", new MovementFunctionOriginal("FUNCTION_LIN",4.841,9.429));
         return movementFunctionMap;
     }
 
     private static Map<String, MovementFunction> createMovementFunctionMap() {
         Map<String, MovementFunction> movementFunctionMap = new HashMap<>();
-        movementFunctionMap.put("1.1", new MovementFunction("FUNCTION_LOG_NO_CONS",2.396,0));
-        movementFunctionMap.put("2.1", new MovementFunction("FUNCTION_LOG",1.933,14.307));
-        movementFunctionMap.put("2.2", new MovementFunction("FUNCTION_LIN",3.132,-2.2));
-        movementFunctionMap.put("2.3", new MovementFunction("FUNCTION_LIN",0.789,2.492));
-        movementFunctionMap.put("2.4", new MovementFunction("FUNCTION_LOG",6.416,0.195));
-        movementFunctionMap.put("2.5", new MovementFunction("FUNCTION_LIN",0.101,1.628));
-        movementFunctionMap.put("2.6", new MovementFunction("FUNCTION_LIN",0.14,5.059));
-        movementFunctionMap.put("3.1", new MovementFunction("FUNCTION_LIN",1.536,3.077));
-        movementFunctionMap.put("3.2", new MovementFunction("FUNCTION_LIN",1.172,6.893));
-        movementFunctionMap.put("3.3", new MovementFunction("FUNCTION_LOG",1.045,13.342));
-        movementFunctionMap.put("3.4", new MovementFunction("FUNCTION_LOG_NO_CONS",6.246,0));
-        movementFunctionMap.put("3.5", new MovementFunction("FUNCTION_LIN",1.8,0.719));
-        movementFunctionMap.put("3.6", new MovementFunction("RATIO_Constant_LAET",2.59,0));
-        movementFunctionMap.put("3.7", new MovementFunction("FUNCTION_LIN",0.176,8.75));
-        movementFunctionMap.put("3.8", new MovementFunction("FUNCTION_LIN",0.614,19.720));
-        movementFunctionMap.put("3.9", new MovementFunction("FUNCTION_LIN",0.352,7.574));
-        movementFunctionMap.put("4.1", new MovementFunction("FUNCTION_LOG",15.086,0.026));
-        movementFunctionMap.put("4.2", new MovementFunction("RATIO_Constant_LAET",2.57,0));
-        movementFunctionMap.put("4.3", new MovementFunction("RATIO_Constant_LAET",7.62,0));
-        movementFunctionMap.put("4.4", new MovementFunction("RATIO_Constant_LAET",2.3,0));
-        movementFunctionMap.put("4.5", new MovementFunction("RATIO_Constant_LAET",2.52,0));
-        movementFunctionMap.put("4.6", new MovementFunction("FUNCTION_LOG",19.31,10.01));
-        movementFunctionMap.put("5.1", new MovementFunction("FUNCTION_LIN",0.108,79.785));
-        movementFunctionMap.put("5.2", new MovementFunction("FUNCTION_LIN",0.961,0.793));
-        movementFunctionMap.put("5.3",new MovementFunction("FUNCTION_LOG_NO_CONS",10.626,0));
-        movementFunctionMap.put("13", new MovementFunction("RATIO_Constant_LAET",1.57,0));
-        movementFunctionMap.put("6.1", new MovementFunction("FUNCTION_LOG_NO_CONS",3.029,0));
-        movementFunctionMap.put("6.2", new MovementFunction("FUNCTION_LOG",5.124,3.362));
-        movementFunctionMap.put("6.3", new MovementFunction("RATIO_Constant_LAET",1.55,0));
-        movementFunctionMap.put("6.4", new MovementFunction("FUNCTION_LOG",1.057,5.364));
-        movementFunctionMap.put("6.5", new MovementFunction("FUNCTION_LIN",0.329,4.277));
-        movementFunctionMap.put("6.6", new MovementFunction("FUNCTION_LOG",4.437,12.43));
-        movementFunctionMap.put("6.7", new MovementFunction("FUNCTION_LOG",0.107,3.3347));
-        movementFunctionMap.put("6.8", new MovementFunction("FUNCTION_LIN",1.413,0.685));
-        movementFunctionMap.put("6.9", new MovementFunction("FUNCTION_LOG",4.998,16.764));
-        movementFunctionMap.put("6.10", new MovementFunction("FUNCTION_LOG",3.304,2.748));
-        movementFunctionMap.put("6.11", new MovementFunction("FUNCTION_LOG",-0.681,5.015));
-        movementFunctionMap.put("7.1", new MovementFunction("FUNCTION_LOG",0.795,1.053));
-        movementFunctionMap.put("7.2", new MovementFunction("FUNCTION_LIN",0.074,1.801));
-        movementFunctionMap.put("7.3", new MovementFunction("RATIO_Constant_LAET",0.64,0));
-        movementFunctionMap.put("7.4", new MovementFunction("FUNCTION_LOG_NO_CONS",4.657,0));
-        movementFunctionMap.put("7.5", new MovementFunction("FUNCTION_LIN",0.157,1.941));
-        movementFunctionMap.put("8.1", new MovementFunction("RATIO_Constant_LAET",12.12,0));
-        movementFunctionMap.put("8.2", new MovementFunction("RATIO_Constant_LAET",4.37,0));
-        movementFunctionMap.put("8.3", new MovementFunction("FUNCTION_LIN",4.841,9.429));
+        movementFunctionMap.put("1.1", new MovementFunction("FUNCTION_LOG_NO_CONS",2.396,0, 1));
+
+        movementFunctionMap.put("2.1", new MovementFunction("FUNCTION_LOG",1.933,14.307, 0.1856));
+        movementFunctionMap.put("2.2", new MovementFunction("FUNCTION_LIN",3.132,-2.2, 0.076));
+        movementFunctionMap.put("2.3", new MovementFunction("FUNCTION_LIN",0.789,2.492, 0.0515));
+        movementFunctionMap.put("2.4", new MovementFunction("FUNCTION_LOG",6.416,0.195, 0.1959));
+        movementFunctionMap.put("2.5", new MovementFunction("FUNCTION_LIN",0.101,1.628, 0.2887));
+        movementFunctionMap.put("2.6", new MovementFunction("FUNCTION_LIN",0.14,5.059, 0.1907));
+
+        movementFunctionMap.put("3.1", new MovementFunction("FUNCTION_LIN",1.536,3.077, 0.0439));
+        movementFunctionMap.put("3.2", new MovementFunction("FUNCTION_LIN",1.172,6.893, 0.193));
+        movementFunctionMap.put("3.3", new MovementFunction("FUNCTION_LOG",1.045,13.342, 0.0175));
+        movementFunctionMap.put("3.4", new MovementFunction("FUNCTION_LOG_NO_CONS",6.246,0, 0.114));
+        movementFunctionMap.put("3.5", new MovementFunction("FUNCTION_LIN",1.8,0.719, 0.0921));
+        movementFunctionMap.put("3.6", new MovementFunction("RATIO_Constant_LAET",2.59,0, 0.136));
+        movementFunctionMap.put("3.7", new MovementFunction("FUNCTION_LIN",0.176,8.75, 0.1184));
+        movementFunctionMap.put("3.8", new MovementFunction("FUNCTION_LIN",0.614,19.720, 0.0658));
+        movementFunctionMap.put("3.9", new MovementFunction("FUNCTION_LIN",0.352,7.574 ,0.2193));
+
+        movementFunctionMap.put("4.1", new MovementFunction("FUNCTION_LOG",15.086,0.026, 0.2114));
+        movementFunctionMap.put("4.2", new MovementFunction("RATIO_Constant_LAET",2.57,0, 0.1138));
+        movementFunctionMap.put("4.3", new MovementFunction("RATIO_Constant_LAET",7.62,0, 0.1463));
+        movementFunctionMap.put("4.4", new MovementFunction("RATIO_Constant_LAET",2.3,0, 0.2276));
+        movementFunctionMap.put("4.5", new MovementFunction("RATIO_Constant_LAET",2.52,0, 0.1382));
+        movementFunctionMap.put("4.6", new MovementFunction("FUNCTION_LOG",19.31,10.01, 0.1626));
+
+        movementFunctionMap.put("5.1", new MovementFunction("FUNCTION_LIN",0.108,79.785, 0.1667));
+        movementFunctionMap.put("5.2", new MovementFunction("FUNCTION_LIN",0.961,0.793, 0.2778));
+        movementFunctionMap.put("5.3",new MovementFunction("FUNCTION_LOG_NO_CONS",10.626,0, 0.5556));
+
+        movementFunctionMap.put("6.1", new MovementFunction("RATIO_Constant_LAET",1.57,0, 0.1622));
+        movementFunctionMap.put("6.2", new MovementFunction("FUNCTION_LOG_NO_CONS",3.029,0, 0.045));
+        movementFunctionMap.put("6.3", new MovementFunction("FUNCTION_LOG",5.124,3.362, 0.0751));
+        movementFunctionMap.put("6.4", new MovementFunction("RATIO_Constant_LAET",1.55,0, 0.0871));
+        movementFunctionMap.put("6.5", new MovementFunction("FUNCTION_LOG",1.057,5.364, 0.0991));
+        movementFunctionMap.put("6.6", new MovementFunction("FUNCTION_LIN",0.329,4.277, 0.0841));
+        movementFunctionMap.put("6.7", new MovementFunction("FUNCTION_LOG",4.437,12.43, 0.1351));
+        movementFunctionMap.put("6.8", new MovementFunction("FUNCTION_LOG",0.107,3.3347, 0.0781));
+        movementFunctionMap.put("6.9", new MovementFunction("FUNCTION_LIN",1.413,0.685, 0.048));
+        movementFunctionMap.put("6.10", new MovementFunction("FUNCTION_LOG",4.998,16.764, 0.045));
+        movementFunctionMap.put("6.11", new MovementFunction("FUNCTION_LOG",3.304,2.748, 0.0631));
+        movementFunctionMap.put("6.12", new MovementFunction("FUNCTION_LOG",-0.681,5.015, 0.2012));
+
+        movementFunctionMap.put("7.1", new MovementFunction("FUNCTION_LOG",0.795,1.053, 0.2513));
+        movementFunctionMap.put("7.2", new MovementFunction("FUNCTION_LIN",0.074,1.801, 0.0653));
+        movementFunctionMap.put("7.3", new MovementFunction("RATIO_Constant_LAET",0.64,0, 0.4121));
+        movementFunctionMap.put("7.4", new MovementFunction("FUNCTION_LOG_NO_CONS",4.657,0, 0.1307));
+        movementFunctionMap.put("7.5", new MovementFunction("FUNCTION_LIN",0.157,1.941, 0.1407));
+
+        movementFunctionMap.put("8.1", new MovementFunction("RATIO_Constant_LAET",12.12,0, 0.1556));
+        movementFunctionMap.put("8.2", new MovementFunction("RATIO_Constant_LAET",4.37,0, 0.5333));
+        movementFunctionMap.put("8.3", new MovementFunction("FUNCTION_LIN",4.841,9.429, 0.3111));
         return movementFunctionMap;
     }
 
@@ -282,7 +304,7 @@ public class Movement implements Comparable {
 
     private void distributeLogistics(int employees) {
         int[] variable = new int[3];
-        Distribution distribution = distributions[st8-1];
+        Distribution distribution = distributions[st8 - 1];
         {
             double rnd = FreightDemand.random.nextDouble();
             if (rnd < distribution.disMove.conjointes) {
@@ -332,7 +354,8 @@ public class Movement implements Comparable {
         }
 
         double tmpTravelDistance = variable[0] * TYPE_OF_MOVEMENT + variable[1] * MANAGEMENT_MODE + ACTIVITY_TYPE_ARRAY[st8 - 1] * ACTIVITY_TYPE + variable[2] * VEHICLE_TYPE + centerDistance * DISTANCE;
-        this.travelDistance = getSample(tmpTravelDistance);;
+        this.travelDistance = getSample(tmpTravelDistance);
+
     }
 
     private static double getSample(double tmpTravelDistance) {
@@ -402,8 +425,24 @@ public class Movement implements Comparable {
         String type;
         double x;
         double y;
+        double z;
 
-        MovementFunction(String type, double x, double y) {
+        MovementFunction(String type, double x, double y, double z) {
+            this.type = type;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+    }
+
+    private static class MovementFunctionOriginal {
+
+        String type;
+        double x;
+        double y;
+
+        MovementFunctionOriginal(String type, double x, double y) {
             this.type = type;
             this.x = x;
             this.y = y;
