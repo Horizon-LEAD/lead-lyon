@@ -1,4 +1,4 @@
-to execute use the class RunFreightDemand
+to execute use the class RunFreightDemand and create a FreightDemand class and call runTest()
 input - sirene-file (https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/)
       - area-file (idf_coords.csv, lyon_coords.csv, nantes_coords.csv, toulouse_coords.csv)
             - needs "siret" column

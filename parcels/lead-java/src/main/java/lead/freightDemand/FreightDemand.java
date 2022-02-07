@@ -45,7 +45,7 @@ public class FreightDemand {
     }
 
     private void writeFiles(List<DirectTour> tripsDirectList, List<RoundTour> tripsRoundList) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "roundRoutes_.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "_roundRoutes.txt"))) {
             writer.write("startX;startY;score;distance;linestring");
             writer.newLine();
             for (RoundTour trip : tripsRoundList){
@@ -56,7 +56,7 @@ public class FreightDemand {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "directRoutes_.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "_directRoutes.txt"))) {
             writer.write("startX;startY;endX;endY;score;distance;linestring");
             writer.newLine();
             for (DirectTour trip : tripsDirectList){
@@ -214,4 +214,111 @@ public class FreightDemand {
     }
 
 
+    public void runTest() throws Exception {
+        List<FreightFacility> freightFacilityList = ReadFacilitiesFile.read(ETABLISSEMENT_FILE, AREA_File);
+        ActivityClasses.setActivityClasses(freightFacilityList);
+        Movement.calculateMovementsForST8(freightFacilityList);
+        Movement.distributeProperties(freightFacilityList, CENTERS);
+        printEmployees();
+        printClasses(freightFacilityList);
+        creatingToursPreparationTest();
+        writeFiles(tripsDirectList, tripsRoundList);
+        List<Trips> weekDayTours = DayAndTimeDistribution.generateDistribution(tripsDirectList, tripsRoundList);
+        FreightMatsimPopulation.generateMATSimFreightPopulation(weekDayTours);
+        System.out.println("Done");
+    }
+
+    private void creatingToursPreparationTest() throws InterruptedException {
+        List<Movement> movementListRoundPL_CA = new ArrayList<>();
+        List<Movement> movementListRoundPL_CPD = new ArrayList<>();
+        List<Movement> movementListRoundPL_CPE = new ArrayList<>();
+        List<Movement> movementListRoundVUL_CA = new ArrayList<>();
+        List<Movement> movementListRoundVUL_CPD = new ArrayList<>();
+        List<Movement> movementListRoundVUL_CPE = new ArrayList<>();
+        List<Movement> movementListDirectPL_CA = new ArrayList<>();
+        List<Movement> movementListDirectPL_CPD = new ArrayList<>();
+        List<Movement> movementListDirectPL_CPE = new ArrayList<>();
+        List<Movement> movementListDirectVUL_CA = new ArrayList<>();
+        List<Movement> movementListDirectVUL_CPD = new ArrayList<>();
+        List<Movement> movementListDirectVUL_CPE = new ArrayList<>();
+        for (Movement movement : Movement.movementList) {
+            if (random.nextDouble() > 0.9) {
+                if (movement.routeType.equals(Movement.RouteType.round)) {
+                    if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                        if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                            movementListRoundPL_CA.add(movement);
+                        } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                            movementListRoundPL_CPD.add(movement);
+                        } else {
+                            movementListRoundPL_CPE.add(movement);
+                        }
+                    } else {
+                        if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                            movementListRoundVUL_CA.add(movement);
+                        } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                            movementListRoundVUL_CPD.add(movement);
+                        } else {
+                            movementListRoundVUL_CPE.add(movement);
+                        }
+                    }
+                } else {
+                    if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                        if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                            movementListDirectPL_CA.add(movement);
+                        } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                            movementListDirectPL_CPD.add(movement);
+                        } else {
+                            movementListDirectPL_CPE.add(movement);
+                        }
+                    } else {
+                        if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                            movementListDirectVUL_CA.add(movement);
+                        } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                            movementListDirectVUL_CPD.add(movement);
+                        } else {
+                            movementListDirectVUL_CPE.add(movement);
+                        }
+                    }
+                }
+            }
+        }
+
+        System.out.println("Start Threads");
+        RunParallelizationRoutes t1 = new RunParallelizationRoutes(movementListRoundPL_CA);
+        RunParallelizationRoutes t2 = new RunParallelizationRoutes(movementListRoundPL_CPD);
+        RunParallelizationRoutes t3 = new RunParallelizationRoutes(movementListRoundPL_CPE);
+        RunParallelizationRoutes t4 = new RunParallelizationRoutes(movementListRoundVUL_CA);
+        RunParallelizationRoutes t5 = new RunParallelizationRoutes(movementListRoundVUL_CPD);
+        RunParallelizationRoutes t6 = new RunParallelizationRoutes(movementListRoundVUL_CPE);
+        RunParallelizationRoutes t7 = new RunParallelizationRoutes(movementListDirectPL_CA);
+        RunParallelizationRoutes t8 = new RunParallelizationRoutes(movementListDirectPL_CPD);
+        RunParallelizationRoutes t9 = new RunParallelizationRoutes(movementListDirectPL_CPE);
+        RunParallelizationRoutes t10 = new RunParallelizationRoutes(movementListDirectVUL_CA);
+        RunParallelizationRoutes t11 = new RunParallelizationRoutes(movementListDirectVUL_CPD);
+        RunParallelizationRoutes t12 = new RunParallelizationRoutes(movementListDirectVUL_CPE);
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        t5.start();
+        t6.start();
+        t7.start();
+        t8.start();
+        t9.start();
+        t10.start();
+        t11.start();
+        t12.start();
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        t5.join();
+        t6.join();
+        t7.join();
+        t8.join();
+        t9.join();
+        t10.join();
+        t11.join();
+        t12.join();
+    }
 }
