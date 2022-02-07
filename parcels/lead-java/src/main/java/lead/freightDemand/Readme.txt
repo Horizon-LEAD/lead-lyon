@@ -6,7 +6,7 @@ input - sirene-file (https://www.data.gouv.fr/fr/datasets/base-sirene-des-entrep
             - needs "x" collum
             - needs "y" collum
       - correct coordinates selected in class RunFreightDemand
-      -
+      - name of the region
 output - txt file ({region_name}directRounds.txt) with
             - Coord of start point
             - Coord of endpoint
