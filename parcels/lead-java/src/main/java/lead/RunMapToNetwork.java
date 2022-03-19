@@ -52,7 +52,7 @@ public class RunMapToNetwork {
 			if (header == null) {
 				header = row;
 			} else {
-				int parcelId = Integer.parseInt(row.get(header.indexOf("location_id")));
+				String parcelId = row.get(header.indexOf("location_id"));
 
 				Coord coord = new Coord( //
 						Double.parseDouble(row.get(header.indexOf("x"))), //
@@ -61,7 +61,7 @@ public class RunMapToNetwork {
 
 				Link closestLink = NetworkUtils.getNearestLink(roadNetwork, coord);
 				writer.write(String.join(";", new String[] { //
-						String.valueOf(parcelId), closestLink.getId().toString() //
+						parcelId, closestLink.getId().toString() //
 				}) + "\n");
 			}
 		}

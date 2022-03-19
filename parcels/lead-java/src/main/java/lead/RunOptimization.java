@@ -2,6 +2,7 @@ package lead;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +14,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.matsim.core.config.CommandLine;
@@ -20,6 +25,7 @@ import org.matsim.core.config.CommandLine.ConfigurationException;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.box.Jsprit.Parameter;
 import com.graphhopper.jsprit.core.algorithm.listener.IterationEndsListener;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
@@ -41,7 +47,8 @@ public class RunOptimization {
 	static public void main(String[] args) throws NumberFormatException, IOException, ConfigurationException {
 		CommandLine cmd = new CommandLine.Builder(args) //
 				.requireOptions("deliveries-path", "costs-path", "depot-node", "output-path") //
-				.allowOptions("vehicle-speed", "vehicle-capacity", "vehicle-type", "max-iterations") //
+				.allowOptions("vehicle-speed", "vehicle-capacity", "vehicle-type", "max-iterations", //
+						"random-seed", "threads", "progress-path") //
 				.build();
 
 		String deliveriesPath = cmd.getOptionStrict("deliveries-path");
@@ -55,6 +62,10 @@ public class RunOptimization {
 		int vehicleCapacity = cmd.getOption("vehicle-capacity").map(Integer::parseInt).orElse(4);
 		int maximumIterations = cmd.getOption("max-iterations").map(Integer::parseInt).orElse(2000);
 		int numberOfVehicles = 20;
+
+		int numberOfThreads = cmd.getOption("threads").map(Integer::parseInt)
+				.orElse(Runtime.getRuntime().availableProcessors());
+		int randomSeed = cmd.getOption("random-seed").map(Integer::parseInt).orElse(0);
 
 		// Define costs
 
@@ -143,51 +154,112 @@ public class RunOptimization {
 
 		// Vehicles
 
-		VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance("robo");
+		Map<String, VehicleTypeImpl> vehicleTypes = new HashMap<>();
 
-		switch (cmd.getOption("vehicle-type").orElse("robo")) {
-		case "robo":
-			vehicleTypeBuilder //
-					.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+		vehicleTypes.put("robo", VehicleTypeImpl.Builder.newInstance("robo") //
+				.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+				.setCostPerWaitingTime(0.0) //
+				.setCostPerDistance(1.0) //
+				.setCostPerTransportTime(0.0) //
+				.setCostPerServiceTime(0.0) //
+				.setFixedCost(0.0) //
+				.build());
+
+		vehicleTypes.put("van", VehicleTypeImpl.Builder.newInstance("van") //
+				.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+				.setCostPerWaitingTime(0.0) //
+				.setCostPerDistance(0.4 * 1e-3) //
+				.setCostPerTransportTime(0.0) //
+				.setCostPerServiceTime(0.0) //
+				.setFixedCost(4000.0 * 12.0 / 365.0) //
+				.build());
+
+		Map<String, Integer> vehicleCounts = new TreeMap<>();
+		vehicleCounts.put(cmd.getOption("vehicle-type").orElse("robo"), numberOfVehicles);
+
+		{
+			vehicleTypes.put("robo4", VehicleTypeImpl.Builder.newInstance("robo4") //
+					.addCapacityDimension(SIZE_INDEX, 4) //
 					.setCostPerWaitingTime(0.0) //
-					.setCostPerDistance(1.0) //
+					.setCostPerDistance(1e-3) //
 					.setCostPerTransportTime(0.0) //
 					.setCostPerServiceTime(0.0) //
-					.setFixedCost(0.0);
-			break;
-		case "van":
-			vehicleTypeBuilder //
-					.addCapacityDimension(SIZE_INDEX, vehicleCapacity) //
+					.setFixedCost(100.0) //
+					.build());
+
+			vehicleTypes.put("robo10", VehicleTypeImpl.Builder.newInstance("robo10") //
+					.addCapacityDimension(SIZE_INDEX, 10) //
 					.setCostPerWaitingTime(0.0) //
-					.setCostPerDistance(0.4 * 1e-3) //
+					.setCostPerDistance(1e-3) //
 					.setCostPerTransportTime(0.0) //
 					.setCostPerServiceTime(0.0) //
-					.setFixedCost(4000.0 * 12.0 / 365.0);
-			break;
+					.setFixedCost(15000.0) //
+					.build());
+
+			vehicleCounts.clear();
+			vehicleCounts.put("robo10", 1); // Next switch to top
+			vehicleCounts.put("robo4", 1);
 		}
-
-		VehicleTypeImpl vehicleType = vehicleTypeBuilder.build();
 
 		List<VehicleImpl> vehicles = new LinkedList<>();
 
-		for (int i = 0; i < numberOfVehicles; i++) {
-			VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle_" + i);
-			vehicleBuilder.setStartLocation(Location.newInstance(depotNode));
-			vehicleBuilder.setEndLocation(Location.newInstance(depotNode));
-			vehicleBuilder.setReturnToDepot(true);
-			vehicleBuilder.setType(vehicleType);
-			vehicles.add(vehicleBuilder.build());
+		for (String type : vehicleCounts.keySet()) {
+			for (int i = 0; i < vehicleCounts.get(type); i++) {
+				VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle_" + type + "_" + i);
+				vehicleBuilder.setStartLocation(Location.newInstance(depotNode));
+				vehicleBuilder.setEndLocation(Location.newInstance(depotNode));
+				vehicleBuilder.setReturnToDepot(true);
+				vehicleBuilder.setType(vehicleTypes.get(type));
+				vehicles.add(vehicleBuilder.build());
+			}
 		}
 
 		VehicleRoutingProblem problem = VehicleRoutingProblem.Builder.newInstance() //
 				.setRoutingCost(costs) //
-				.setFleetSize(FleetSize.FINITE) //
+				.setFleetSize(FleetSize.INFINITE) //
 				.addAllJobs(shipments) //
 				.addAllVehicles(vehicles) //
 				.build();
 
-		VehicleRoutingAlgorithm algorithm = Jsprit.createAlgorithm(problem);
+		ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+
+		VehicleRoutingAlgorithm algorithm = Jsprit.Builder.newInstance(problem) //
+				.setRandom(new Random(randomSeed)) //
+				.setExecutorService(executorService, numberOfThreads) //
+				.setProperty(Parameter.FIXED_COST_PARAM, "1.0") //
+				.buildAlgorithm();
+
 		algorithm.setMaxIterations(maximumIterations);
+
+		final BufferedWriter progressWriter;
+
+		if (cmd.hasOption("progress-path")) {
+			progressWriter = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(new File(cmd.getOptionStrict("progress-path")))));
+			progressWriter.write(String.join(",", Arrays.asList("iteration", "minimum", "maximum", "mean")) + "\n");
+			progressWriter.flush();
+
+			algorithm.addListener(new IterationEndsListener() {
+				@Override
+				public void informIterationEnds(int i, VehicleRoutingProblem problem,
+						Collection<VehicleRoutingProblemSolution> solutions) {
+					double minimumCost = solutions.stream().mapToDouble(s -> s.getCost()).min().getAsDouble();
+					double maximumCost = solutions.stream().mapToDouble(s -> s.getCost()).max().getAsDouble();
+					double meanCost = solutions.stream().mapToDouble(s -> s.getCost()).average().getAsDouble();
+
+					try {
+						progressWriter
+								.write(String.join(",", Arrays.asList(String.valueOf(i), String.valueOf(minimumCost),
+										String.valueOf(maximumCost), String.valueOf(meanCost))) + "\n");
+						progressWriter.flush();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			});
+		} else {
+			progressWriter = null;
+		}
 
 		AtomicInteger usedIterations = new AtomicInteger(0);
 		algorithm.addListener(new IterationEndsListener() {
@@ -256,5 +328,10 @@ public class RunOptimization {
 		}
 
 		SolutionPrinter.print(problem, bestSolution, SolutionPrinter.Print.VERBOSE);
+		executorService.shutdown();
+
+		if (progressWriter != null) {
+			progressWriter.close();
+		}
 	}
 }
