@@ -12,7 +12,8 @@ public class RunFreightDemand {
         String etablissementFile = "G:/lead/Marc/Freturb_Light/Input_Tabellen/StockEtablissement_utf8.csv";
 //        String areaFile = "C:/lead/Marc/Freturb_Light/Input_Tabellen/nantes_coords.csv";
         String areaFile = "idf_coords.csv";
-        String apeClasses = "corrST45-NAF_MATSIM.csv";
+//        String apeClasses = "corrST45-NAF_MATSIM.csv";
+        String apeClasses = "";
         // idf
         List<Coord> centers = Arrays.asList(new Coord(652111.1,6861807.2));
         // nantes
@@ -42,9 +43,9 @@ public class RunFreightDemand {
         FreightDemand freightDemand = new FreightDemand(etablissementFile, apeClasses, areaFile, centers, output);
 
         // only 10% movements
-        freightDemand.runTest();
+//        freightDemand.runTest();
         // all movements, takes a long time
-//        freightDemand.run();
+        freightDemand.run();
 
 
     }

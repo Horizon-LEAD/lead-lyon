@@ -31,18 +31,262 @@ public class FreightDemand {
         List<FreightFacility> freightFacilityList = ReadFacilitiesFile.read(ETABLISSEMENT_FILE, AREA_File);
 //        ActivityClasses.setActivityClassesOriginal(ACTIVITY_CLASSES, freightFacilityList);
         ActivityClasses.setActivityClasses(freightFacilityList);
-//        Movement.calculateMovements(freightFacilityList);
-        Movement.calculateMovementsForST8(freightFacilityList);
+        Movement.calculateMovements(freightFacilityList);
+//        Movement.calculateMovementsForST8(freightFacilityList);
         Movement.distributeProperties(freightFacilityList, CENTERS);
         printEmployees();
         printClasses(freightFacilityList);
 //        writeAll();
+        fixDistribution();
         creatingToursPreparation();
         writeFiles(tripsDirectList, tripsRoundList);
         List<Trips> weekDayTours = DayAndTimeDistribution.generateDistribution(tripsDirectList, tripsRoundList);
         FreightMatsimPopulation.generateMATSimFreightPopulation(weekDayTours);
         System.out.println("Done");
     }
+
+    private void fixDistribution() {
+        List<Movement> movementListRound_Not_LIV_PL_CA = new ArrayList<>();
+        List<Movement> movementListRound_Not_LIV_PL_CPD = new ArrayList<>();
+        List<Movement> movementListRound_Not_LIV_PL_CPE = new ArrayList<>();
+        List<Movement> movementListRound_Not_LIV_VUL_CA = new ArrayList<>();
+        List<Movement> movementListRound_Not_LIV_VUL_CPD = new ArrayList<>();
+        List<Movement> movementListRound_Not_LIV_VUL_CPE = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_PL_CA = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_PL_CPD = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_PL_CPE = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_VUL_CA = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_VUL_CPD = new ArrayList<>();
+        List<Movement> movementListDirect_LIV_VUL_CPE = new ArrayList<>();
+        List<Movement> movementListRound_LIV_PL_CA = new ArrayList<>();
+        List<Movement> movementListRound_LIV_PL_CPD = new ArrayList<>();
+        List<Movement> movementListRound_LIV_PL_CPE = new ArrayList<>();
+        List<Movement> movementListRound_LIV_VUL_CA = new ArrayList<>();
+        List<Movement> movementListRound_LIV_VUL_CPD = new ArrayList<>();
+        List<Movement> movementListRound_LIV_VUL_CPE = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_PL_CA = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_PL_CPD = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_PL_CPE = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_VUL_CA = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_VUL_CPD = new ArrayList<>();
+        List<Movement> movementListDirect_Not_LIV_VUL_CPE = new ArrayList<>();
+        for (Movement movement : Movement.movementList) {
+            if (movement.routeType.equals(Movement.RouteType.round) && !movement.disMove.equals(Movement.DistributionMovement.Movements.livraisons)) {
+                if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListRound_Not_LIV_PL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListRound_Not_LIV_PL_CPD.add(movement);
+                    } else {
+                        movementListRound_Not_LIV_PL_CPE.add(movement);
+                    }
+                } else {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListRound_Not_LIV_VUL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListRound_Not_LIV_VUL_CPD.add(movement);
+                    } else {
+                        movementListRound_Not_LIV_VUL_CPE.add(movement);
+                    }
+                }
+            } else if (movement.routeType.equals(Movement.RouteType.direct) && movement.disMove.equals(Movement.DistributionMovement.Movements.livraisons)) {
+                if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListDirect_LIV_PL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListDirect_LIV_PL_CPD.add(movement);
+                    } else {
+                        movementListDirect_LIV_PL_CPE.add(movement);
+                    }
+                } else {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListDirect_LIV_VUL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListDirect_LIV_VUL_CPD.add(movement);
+                    } else {
+                        movementListDirect_LIV_VUL_CPE.add(movement);
+                    }
+                }
+            }
+            if (movement.routeType.equals(Movement.RouteType.round) && movement.disMove.equals(Movement.DistributionMovement.Movements.livraisons)) {
+                if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListRound_LIV_PL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListRound_LIV_PL_CPD.add(movement);
+                    } else {
+                        movementListRound_LIV_PL_CPE.add(movement);
+                    }
+                } else {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListRound_LIV_VUL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListRound_LIV_VUL_CPD.add(movement);
+                    } else {
+                        movementListRound_LIV_VUL_CPE.add(movement);
+                    }
+                }
+            } else if (movement.routeType.equals(Movement.RouteType.direct) && !movement.disMove.equals(Movement.DistributionMovement.Movements.livraisons)) {
+                if (movement.disVeh20.equals(Movement.DistributionVehicleST20.VehicleST20.PL)) {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListDirect_Not_LIV_PL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListDirect_Not_LIV_PL_CPD.add(movement);
+                    } else {
+                        movementListDirect_Not_LIV_PL_CPE.add(movement);
+                    }
+                } else {
+                    if (movement.disMan.equals(Movement.DistributionManagement.Management.CA)) {
+                        movementListDirect_Not_LIV_VUL_CA.add(movement);
+                    } else if (movement.disMan.equals(Movement.DistributionManagement.Management.CPD)) {
+                        movementListDirect_Not_LIV_VUL_CPD.add(movement);
+                    } else {
+                        movementListDirect_Not_LIV_VUL_CPE.add(movement);
+                    }
+                }
+            }
+        }
+
+        if (Movement.directDiff_PL_CA < 0) {
+            var diff = Math.abs(Movement.directDiff_PL_CA);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_PL_CA.get(random.nextInt(movementListDirect_LIV_PL_CA.size()));
+                var movement2 = movementListRound_Not_LIV_PL_CA.get(random.nextInt(movementListRound_Not_LIV_PL_CA.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_PL_CA.remove(movement1);
+                movementListRound_Not_LIV_PL_CA.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_PL_CA > 0) {
+            var diff = Movement.directDiff_PL_CA;
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_PL_CA.get(random.nextInt(movementListDirect_Not_LIV_PL_CA.size()));
+                var movement2 = movementListRound_LIV_PL_CA.get(random.nextInt(movementListRound_LIV_PL_CA.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_PL_CA.remove(movement1);
+                movementListRound_LIV_PL_CA.remove(movement2);
+                diff -= 2;
+            }
+        }
+        if (Movement.directDiff_PL_CPD < 0) {
+            var diff = Math.abs(Movement.directDiff_PL_CPD);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_PL_CPD.get(random.nextInt(movementListDirect_LIV_PL_CPD.size()));
+                var movement2 = movementListRound_Not_LIV_PL_CPD.get(random.nextInt(movementListRound_Not_LIV_PL_CPD.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_PL_CPD.remove(movement1);
+                movementListRound_Not_LIV_PL_CPD.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_PL_CPD > 0) {
+            var diff = Math.abs(Movement.directDiff_PL_CPD);
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_PL_CPD.get(random.nextInt(movementListDirect_Not_LIV_PL_CPD.size()));
+                var movement2 = movementListRound_LIV_PL_CPD.get(random.nextInt(movementListRound_LIV_PL_CPD.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_PL_CPD.remove(movement1);
+                movementListRound_LIV_PL_CPD.remove(movement2);
+                diff -= 2;
+            }
+        }
+        if (Movement.directDiff_PL_CPE < 0) {
+            var diff = Math.abs(Movement.directDiff_PL_CPE);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_PL_CPE.get(random.nextInt(movementListDirect_LIV_PL_CPE.size()));
+                var movement2 = movementListRound_Not_LIV_PL_CPE.get(random.nextInt(movementListRound_Not_LIV_PL_CPE.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_PL_CPE.remove(movement1);
+                movementListRound_Not_LIV_PL_CPE.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_PL_CPE > 0) {
+            var diff = Math.abs(Movement.directDiff_PL_CPE);
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_PL_CPE.get(random.nextInt(movementListDirect_Not_LIV_PL_CPE.size()));
+                var movement2 = movementListRound_LIV_PL_CPE.get(random.nextInt(movementListRound_LIV_PL_CPE.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_PL_CPE.remove(movement1);
+                movementListRound_LIV_PL_CPE.remove(movement2);
+                diff -= 2;
+            }
+        }
+        if (Movement.directDiff_VUL_CA < 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CA);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_VUL_CA.get(random.nextInt(movementListDirect_LIV_VUL_CA.size()));
+                var movement2 = movementListRound_Not_LIV_VUL_CA.get(random.nextInt(movementListRound_Not_LIV_VUL_CA.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_VUL_CA.remove(movement1);
+                movementListRound_Not_LIV_VUL_CA.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_VUL_CA > 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CA);
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_VUL_CA.get(random.nextInt(movementListDirect_Not_LIV_VUL_CA.size()));
+                var movement2 = movementListRound_LIV_VUL_CA.get(random.nextInt(movementListRound_LIV_VUL_CA.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_VUL_CA.remove(movement1);
+                movementListRound_LIV_VUL_CA.remove(movement2);
+                diff -= 2;
+            }
+        }
+        if (Movement.directDiff_VUL_CPD < 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CPD);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_VUL_CPD.get(random.nextInt(movementListDirect_LIV_VUL_CPD.size()));
+                var movement2 = movementListRound_Not_LIV_VUL_CPD.get(random.nextInt(movementListRound_Not_LIV_VUL_CPD.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_VUL_CPD.remove(movement1);
+                movementListRound_Not_LIV_VUL_CPD.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_VUL_CPD > 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CPD);
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_VUL_CPD.get(random.nextInt(movementListDirect_Not_LIV_VUL_CPD.size()));
+                var movement2 = movementListRound_LIV_VUL_CPD.get(random.nextInt(movementListRound_LIV_VUL_CPD.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_VUL_CPD.remove(movement1);
+                movementListRound_LIV_VUL_CPD.remove(movement2);
+                diff -= 2;
+            }
+        }
+        if (Movement.directDiff_VUL_CPE < 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CPE);
+            while (diff > 1) {
+                var movement1 = movementListDirect_LIV_VUL_CPE.get(random.nextInt(movementListDirect_LIV_VUL_CPE.size()));
+                var movement2 = movementListRound_Not_LIV_VUL_CPE.get(random.nextInt(movementListRound_Not_LIV_VUL_CPE.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_LIV_VUL_CPE.remove(movement1);
+                movementListRound_Not_LIV_VUL_CPE.remove(movement2);
+                diff -= 2;
+            }
+        } else if (Movement.directDiff_VUL_CPE > 0) {
+            var diff = Math.abs(Movement.directDiff_VUL_CPE);
+            while (diff > 1) {
+                var movement1 = movementListDirect_Not_LIV_VUL_CPE.get(random.nextInt(movementListDirect_Not_LIV_VUL_CPE.size()));
+                var movement2 = movementListRound_LIV_VUL_CPE.get(random.nextInt(movementListRound_LIV_VUL_CPE.size()));
+                movement1.routeType = Movement.RouteType.round;
+                movement2.routeType = Movement.RouteType.direct;
+                movementListDirect_Not_LIV_VUL_CPE.remove(movement1);
+                movementListRound_LIV_VUL_CPE.remove(movement2);
+                diff -= 2;
+            }
+        }
+    }
+
 
     private void writeFiles(List<DirectTour> tripsDirectList, List<RoundTour> tripsRoundList) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputLocation + "_roundRoutes.txt"))) {
@@ -217,9 +461,11 @@ public class FreightDemand {
     public void runTest() throws Exception {
         List<FreightFacility> freightFacilityList = ReadFacilitiesFile.read(ETABLISSEMENT_FILE, AREA_File);
         ActivityClasses.setActivityClasses(freightFacilityList);
-        Movement.calculateMovementsForST8(freightFacilityList);
+//        Movement.calculateMovementsForST8(freightFacilityList);
+        Movement.calculateMovements(freightFacilityList);
         Movement.distributeProperties(freightFacilityList, CENTERS);
         printEmployees();
+        fixDistribution();
         printClasses(freightFacilityList);
         creatingToursPreparationTest();
         writeFiles(tripsDirectList, tripsRoundList);

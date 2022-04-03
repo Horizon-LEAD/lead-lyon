@@ -31,7 +31,7 @@ public class FreightMatsimPopulation {
                 Activity activity = pf.createActivityFromCoord("truck_operation", directTrip.startPoint.coord);
                 plan.addActivity(activity);
                 Activity activity2 = pf.createActivityFromCoord("truck_operation", directTrip.entPoint.coord);
-                activity2.setStartTime(directTrip.timeSlot);
+                activity2.setEndTime(directTrip.timeSlot);
                 plan.addActivity(activity2);
                 Activity activity3 = pf.createActivityFromCoord("truck_operation", directTrip.startPoint.coord);
                 plan.addActivity(activity3);
