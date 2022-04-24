@@ -62,10 +62,10 @@ public class Movement implements Comparable {
     }
 
     static void calculateMovements(List<FreightFacility> freightFacilityList) throws Exception {
-        calculateMovementsForST8(freightFacilityList);
+//        calculateMovementsForST8(freightFacilityList);
         var map = new HashMap<>();
         HashMap<String, Integer> map2 = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("ape_to_regression_int.csv")))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("ape_to_regression_v2.csv")))) {
             String line;
             List<String> header = null;
             while ((line = reader.readLine()) != null) {
@@ -86,58 +86,12 @@ public class Movement implements Comparable {
         var count = 0;
         for (FreightFacility freightFacility : freightFacilityList) {
             try {
-                var key = "" + freightFacility.getSt8() + ".";
-                if (freightFacility.getSt8() == 6) {
-                    if (map.get(freightFacility.ape).equals("1")) {
-                        key += 1;
-                    } else if (map.get(freightFacility.ape).equals("2")) {
-                        key += 10;
-                    } else if (map.get(freightFacility.ape).equals("3")) {
-                        key += 11;
-                    }else if (map.get(freightFacility.ape).equals("4")) {
-                        key += 12;
-                    }else if (map.get(freightFacility.ape).equals("5")) {
-                        key += 2;
-                    }else if (map.get(freightFacility.ape).equals("6")) {
-                        key += 3;
-                    }else if (map.get(freightFacility.ape).equals("7")) {
-                        key += 4;
-                    }else if (map.get(freightFacility.ape).equals("8")) {
-                        key += 5;
-                    }else if (map.get(freightFacility.ape).equals("9")) {
-                        key += 6;
-                    }else if (map.get(freightFacility.ape).equals("10")) {
-                        key += 7;
-                    }else if (map.get(freightFacility.ape).equals("11")) {
-                        key += 8;
-                    }else if (map.get(freightFacility.ape).equals("12")) {
-                        key += 9;
-                    }
-                } else {
-                    key += map.get(freightFacility.ape);
-                }
+                var key = "" + freightFacility.getSt8() + "." + map.get(freightFacility.ape);
                 freightFacility.movements = Math.round(selectCorrectFunction(movementFunctionMap.get(key), freightFacility.getEmployees()));
             } catch (Exception e) {
                 count++;
             }
         }
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("movements_after.txt"))) {
-//            writer.write("siret;employees;st8;ape;key;function;movements");
-//            for (FreightFacility freightFacility : freightFacilityList) {
-//                try {
-//                    var key = "" + freightFacility.getSt8() + "." + map.get(freightFacility.ape);
-//                    writer.newLine();
-//                    String out = "";
-//                    out += freightFacility.siret + ";" + freightFacility.getEmployees() + ";" + freightFacility.getSt8() + ";" + freightFacility.getAPE() + ";" + key + ";" + map.get(freightFacility.ape) + ";";
-//                    double movments = Math.round(selectCorrectFunction(movementFunctionMap.get(key), freightFacility.getEmployees()));
-//                    writer.write(out + movments);
-//                    writer.flush();
-//                    freightFacility.movements = Math.round(selectCorrectFunction(movementFunctionMap.get(key), freightFacility.getEmployees()));
-//                } catch (Exception e) {
-//                    count++;
-//                }
-//            }
-//        }
     System.out.println("APE ist empty: " + count);
     }
 
@@ -192,9 +146,6 @@ public class Movement implements Comparable {
                 }
                 writer.write(out);
                 writer.flush();
-//            if (count != 0) {
-//                freightFacility.movements = (int) Math.round(movments / (count));
-//            }
             }
         }catch (Exception ignored){
 
