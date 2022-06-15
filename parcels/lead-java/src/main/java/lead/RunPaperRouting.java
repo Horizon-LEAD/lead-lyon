@@ -22,6 +22,7 @@ import java.util.zip.GZIPInputStream;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.IdSet;
 import org.matsim.api.core.v01.network.Link;
@@ -45,7 +46,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import lead.timing.RecordedTravelTime;
 
-public class RunODLinkRouting {
+public class RunPaperRouting {
 	static public void main(String[] args) throws IOException, ConfigurationException, InterruptedException {
 		CommandLine cmd = new CommandLine.Builder(args) //
 				.requireOptions("network-path", "input-path", "output-path") //
@@ -67,14 +68,33 @@ public class RunODLinkRouting {
 		Network roadNetwork = NetworkUtils.createNetwork();
 		new TransportModeNetworkFilter(network).filter(roadNetwork, Collections.singleton("car"));
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath)));
+		List<Id<Link>> linkIds = new LinkedList<>();
 
-		List<Id<Link>> originIds = Arrays.asList(reader.readLine().split(";")).stream().map(Id::createLinkId)
-				.collect(Collectors.toList());
-		List<Id<Link>> destinationIds = Arrays.asList(reader.readLine().split(";")).stream().map(Id::createLinkId)
-				.collect(Collectors.toList());
+		{
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath)));
 
-		reader.close();
+			String line = null;
+			List<String> header = null;
+
+			while ((line = reader.readLine()) != null) {
+				List<String> row = Arrays.asList(line.split(";"));
+
+				if (header == null) {
+					header = row;
+				} else {
+					double x = Double.parseDouble(row.get(header.indexOf("x")));
+					double y = Double.parseDouble(row.get(header.indexOf("y")));
+
+					Link closestLink = NetworkUtils.getNearestLink(roadNetwork, new Coord(x, y));
+					linkIds.add(closestLink.getId());
+				}
+			}
+
+			reader.close();
+		}
+
+		List<Id<Link>> originIds = new ArrayList<>(linkIds);
+		List<Id<Link>> destinationIds = new ArrayList<>(linkIds);
 
 		final Function<Link, Boolean> isInArea;
 
@@ -124,9 +144,16 @@ public class RunODLinkRouting {
 		double startTime = System.nanoTime() * 1e-9;
 		AtomicDouble nextTime = new AtomicDouble();
 
+		List<Integer> originIndices = new ArrayList<>(originIds.size());
+
+		for (int originIndex = 0; originIndex < originIds.size(); originIndex++) {
+			originIndices.add(originIndex);
+		}
+
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath)));
 
-		List<String> header = Arrays.asList("origin_id", "destination_id", "travel_time", "distance", "area_distance");
+		List<String> header = Arrays.asList("origin_index", "destination_index", "travel_time", "distance",
+				"area_distance");
 
 		if (trackRoutes) {
 			header = new ArrayList<>(header);
@@ -143,22 +170,26 @@ public class RunODLinkRouting {
 						new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
 
 				while (true) {
-					Id<Link> originId = null;
+					int originIndex = -1;
 
-					synchronized (originIds) {
-						if (originIds.size() > 0) {
-							originId = originIds.remove(0);
+					synchronized (originIndices) {
+						if (originIndices.size() > 0) {
+							originIndex = originIndices.remove(0);
 						} else {
 							return;
 						}
 					}
+
+					Id<Link> originId = originIds.get(originIndex);
 
 					List<Double> travelTimes = new LinkedList<>();
 					List<Double> distances = new LinkedList<>();
 					List<Double> areaDistances = new LinkedList<>();
 					List<IdSet<Link>> routes = new LinkedList<>();
 
-					for (Id<Link> destinationId : destinationIds) {
+					for (int destinationIndex = 0; destinationIndex < destinationIds.size(); destinationIndex++) {
+						Id<Link> destinationId = destinationIds.get(destinationIndex);
+
 						Link originLink = roadNetwork.getLinks().get(originId);
 						Link destinationLink = roadNetwork.getLinks().get(destinationId);
 
@@ -213,7 +244,7 @@ public class RunODLinkRouting {
 
 							try {
 								List<String> columns = Arrays.asList( //
-										originId.toString(), destinationId.toString(), //
+										String.valueOf(originIndex), String.valueOf(k), //
 										String.valueOf(travelTimes.get(k)), String.valueOf(distances.get(k)),
 										String.valueOf(areaDistances.get(k)) //
 								);
